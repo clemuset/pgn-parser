@@ -203,7 +203,7 @@ Parsers (`PGNParser`, `SANParser`, `FENParser`) transform strings into structure
 Clone the repository and install dev dependencies:
 
 ```bash
-git clone https://github.com//pgn-parser.git
+git clone https://github.com/clemuset/pgn-parser.git
 cd pgn-parser
 composer install
 ```
