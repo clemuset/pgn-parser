@@ -86,4 +86,12 @@ enum SquareEnum: string
 
         return (($file + $rank) % 2 === 0) ? ColorEnum::WHITE : ColorEnum::BLACK;
     }
+
+    public static function allowedEnPassantTargets(): array
+    {
+        return [
+            self::A3, self::B3, self::C3, self::D3, self::E3, self::F3, self::G3, self::H3,
+            self::A6, self::B6, self::C6, self::D6, self::E6, self::F6, self::G6, self::H6,
+        ];
+    }
 }

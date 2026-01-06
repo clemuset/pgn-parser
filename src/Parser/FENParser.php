@@ -29,7 +29,16 @@ class FENParser implements FENParserInterface
 
         $position->setSideToMove(ColorEnum::from($this->extractSideToMove($fen)));
         $position->setCastlingRights($this->extractCastlingRights($fen));
-        $position->setEnPassantTarget(SquareEnum::tryFrom($this->extractEnPassantTarget($fen)));
+
+        $enPassantTarget = SquareEnum::tryFrom($this->extractEnPassantTarget($fen));
+
+        if (null !== $enPassantTarget) {
+            if (!in_array($enPassantTarget, SquareEnum::allowedEnPassantTargets())) {
+                throw new FENParsingException('Invalid en passant target square in FEN string');
+            }
+            $position->setEnPassantTarget(SquareEnum::tryFrom($this->extractEnPassantTarget($fen)));
+        }
+
         $position->setHalfmoveClock($this->extractHalfmoveClock($fen));
         $position->setFullmoveNumber($this->extractFullmoveNumber($fen));
 

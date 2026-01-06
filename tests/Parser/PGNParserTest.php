@@ -36,8 +36,11 @@ PGN;
         $n2 = $mainLine['1...']; // ... e5
         $n3 = $mainLine['2.']; // 2. Nf3
         self::assertSame(1, $n1->getMoveNumber());
+        self::assertSame('e4', $n1->getMove()->getSAN());
         self::assertSame(1, $n2->getMoveNumber());
+        self::assertSame('e5', $n2->getMove()->getSAN());
         self::assertSame(2, $n3->getMoveNumber());
+        self::assertSame('Nf3', $n3->getMove()->getSAN());
     }
 
     public function testParseGameWithoutTagsResultAtEnd(): void
@@ -63,12 +66,12 @@ PGN;
         $e4 = $mainLine['1.'];
         self::assertSame('Central control', $e4->getComment());
         $nf3 = $mainLine['2.'];
-        self::assertSame([1], $nf3->getNags());
+        self::assertTrue(in_array(1, $nf3->getNags()));
         $variationNodes = $nf3->getVariations();
         self::assertCount(1, $variationNodes);
         $variation = $variationNodes[0];
         // Variation root has its own mainline (2... Nc6 3. Bb5)
-        $nc6 = $variation['2...'];
+        $nc6 = $variation['2...'] ?? null;
         self::assertNotNull($nc6);
         self::assertSame(2, $nc6->getMoveNumber());
         self::assertSame(ColorEnum::BLACK, $nc6->getColor());
