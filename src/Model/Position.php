@@ -305,8 +305,6 @@ class Position
 
     public function getLegalMoves(): array
     {
-        $applier = new MoveApplier(verifyCheckmate: false);
-
         $legalMoves = [];
         foreach ($this->iterateSquaresWithPiece($this->getSideToMove()) as $fromSquare) {
             $piece = $fromSquare->getPiece();
@@ -319,7 +317,7 @@ class Position
                 $cloneMove->setTo($toSquareEnum);
 
                 try {
-                    $applier->apply($this, $cloneMove);
+                    $this->applyMove($cloneMove);
                     $legalMoves[] = $cloneMove;
                 } catch (\Exception) {
                 }
@@ -337,7 +335,7 @@ class Position
             $move->setCastling($castlingRight);
 
             try {
-                $applier->apply($this, $move);
+                $this->applyMove($move);
                 $legalMoves[] = $move;
             } catch (\Exception) {
             }

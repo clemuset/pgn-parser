@@ -14,11 +14,6 @@ use Cmuset\PgnParser\Validator\PositionValidator;
 
 class MoveApplier
 {
-    public function __construct(
-        private readonly bool $verifyCheckmate = true
-    ) {
-    }
-
     public function apply(Position $previousPosition, Move $move): Position
     {
         $position = clone $previousPosition;
@@ -92,7 +87,7 @@ class MoveApplier
             throw new MoveApplyingException(MoveViolationEnum::MOVE_NOT_CHECK);
         }
 
-        if ($this->verifyCheckmate && $move->isCheckmate() && !$position->isCheckmate()) {
+        if ($move->isCheckmate() && !$position->isCheckmate()) {
             throw new MoveApplyingException(MoveViolationEnum::MOVE_NOT_CHECKMATE);
         }
 
