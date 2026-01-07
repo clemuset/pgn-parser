@@ -35,14 +35,14 @@ class SANParserTest extends TestCase
         self::assertSame(PieceEnum::BLACK_KNIGHT, $move->getPiece());
         self::assertSame('d7', $move->getTo()?->value);
         self::assertSame('b', $move->getFileFrom());
-        self::assertNull($move->getRowFrom());
+        self::assertNull($move->getRankFrom());
     }
 
     public function testParsePieceMoveWithDisambiguationRank(): void
     {
         $move = $this->parser->parse('N1d7', ColorEnum::WHITE);
         self::assertSame(PieceEnum::WHITE_KNIGHT, $move->getPiece());
-        self::assertSame(1, $move->getRowFrom());
+        self::assertSame(1, $move->getRankFrom());
     }
 
     public function testParseCaptureWithCheck(): void

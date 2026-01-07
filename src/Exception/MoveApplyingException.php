@@ -24,4 +24,12 @@ class MoveApplyingException extends \Exception
     {
         return $this->moveViolation;
     }
+
+    /**
+     * @return PositionViolationEnum[]
+     */
+    public function getPositionViolations(): array
+    {
+        return $this->positionViolations;
+    }
 }

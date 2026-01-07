@@ -10,7 +10,7 @@ class MoveExporter implements MoveExporterInterface
     public function export(Move $move): string
     {
         $san = $move->getPiece()->isPawn() ? '' : strtoupper($move->getPiece()->value);
-        $san .= $move->getFileFrom() . $move->getRowFrom();
+        $san .= $move->getFileFrom() . $move->getRankFrom();
 
         if ($move->isCastling()) {
             return match ($move->getCastling()) {

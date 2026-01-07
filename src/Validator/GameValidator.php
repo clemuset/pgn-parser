@@ -2,7 +2,7 @@
 
 namespace Cmuset\PgnParser\Validator;
 
-use Cmuset\PgnParser\Enum\Violation\MoveViolationEnum;
+use Cmuset\PgnParser\Enum\Violation\ViolationEnumInterface;
 use Cmuset\PgnParser\Exception\MoveApplyingException;
 use Cmuset\PgnParser\Model\Game;
 use Cmuset\PgnParser\Model\MoveNode;
@@ -18,33 +18,38 @@ class GameValidator
         $this->moveApplier = new MoveApplier();
     }
 
-    public function validate(Game $game): ?MoveViolationEnum
+    /**
+     * @return ViolationEnumInterface[]
+     */
+    public function validate(Game $game): array
     {
         return $this->validateLine($game->getInitialPosition(), $game->getMainLine());
     }
 
     /**
      * @param MoveNode[] $line
+     *
+     * @return ViolationEnumInterface[]
      */
-    private function validateLine(Position $position, array $line): ?MoveViolationEnum
+    private function validateLine(Position $position, array $line): array
     {
         $currentPosition = clone $position;
         foreach ($line as $node) {
             foreach ($node->getVariations() as $variation) {
-                $violation = $this->validateLine($currentPosition, $variation);
+                $violations = $this->validateLine($currentPosition, $variation);
 
-                if (null !== $violation) {
-                    return $violation;
+                if (count($violations) > 0) {
+                    return $violations;
                 }
             }
 
             try {
-                $currentPosition = $this->moveApplier->apply($position, $node->getMove());
+                $currentPosition = $this->moveApplier->apply($currentPosition, $node->getMove());
             } catch (MoveApplyingException $e) {
-                return $e->getMoveViolation();
+                return [$e->getMoveViolation(), ...$e->getPositionViolations()];
             }
         }
 
-        return null;
+        return [];
     }
 }

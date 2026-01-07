@@ -49,6 +49,31 @@ class PositionValidator
             $violations[] = PositionViolationEnum::KING_IN_CHECK;
         }
 
+        $whitePawns = $position->find(PieceEnum::WHITE_PAWN);
+        $blackPawns = $position->find(PieceEnum::BLACK_PAWN);
+
+        foreach ([...$whitePawns, ...$blackPawns] as $pawnSquare) {
+            $rank = $pawnSquare->getSquare()->rank();
+
+            if (1 === $rank || 8 === $rank) {
+                $violations[] = PositionViolationEnum::PAWN_ON_INVALID_RANK;
+                break;
+            }
+        }
+
+        if (count($whitePawns) > 8 || count($blackPawns) > 8) {
+            $violations[] = PositionViolationEnum::TOO_MANY_PAWNS;
+        }
+
+        if (null !== $position->getEnPassantTarget()) {
+            $enPassantSquare = $position->getEnPassantTarget();
+            $expectedRank = ColorEnum::WHITE === $position->getSideToMove() ? 6 : 3;
+
+            if ($enPassantSquare->rank() !== $expectedRank || null !== $position->getPieceAt($enPassantSquare)) {
+                $violations[] = PositionViolationEnum::EN_PASSANT_SQUARE_INVALID;
+            }
+        }
+
         return $violations;
     }
 }

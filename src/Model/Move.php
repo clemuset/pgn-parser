@@ -63,7 +63,7 @@ class Move
         $this->fileFrom = $fileFrom;
     }
 
-    public function getRowFrom(): ?int
+    public function getRankFrom(): ?int
     {
         return $this->rowFrom;
     }

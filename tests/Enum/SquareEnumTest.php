@@ -22,7 +22,6 @@ class SquareEnumTest extends TestCase
 
     public function testColorLightSquares(): void
     {
-        // a1 is dark in real chess, but color() method defines parity differently (file+rank even => white)
         self::assertSame(ColorEnum::WHITE, SquareEnum::A1->color());
         self::assertSame(ColorEnum::WHITE, SquareEnum::H8->color());
     }
