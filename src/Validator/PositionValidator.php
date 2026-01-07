@@ -45,7 +45,7 @@ class PositionValidator
             ? $position->findOne(PieceEnum::WHITE_KING)
             : $position->findOne(PieceEnum::BLACK_KING);
 
-        if (count($position->findAttackers($opponentKingSquare)) >= 1) {
+        if (count($position->findAttackers($opponentKingSquare, $position->getSideToMove())) >= 1) {
             $violations[] = PositionViolationEnum::KING_IN_CHECK;
         }
 

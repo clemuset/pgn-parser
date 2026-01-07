@@ -141,6 +141,21 @@ class GameValidatorTest extends TestCase
         self::assertTrue(in_array(MoveViolationEnum::MOVE_NOT_CHECKMATE, $violations, true));
     }
 
+    public function testOperaGameHasNoViolations(): void
+    {
+        $pgnFile = __DIR__ . '/../resources/opera_chesscom.pgn';
+        $pgn = file_get_contents($pgnFile);
+
+        if (false === $pgn) {
+            self::fail('Failed to read PGN file: ' . $pgnFile);
+        }
+
+        $game = Game::fromPGN($pgn);
+
+        $violations = $this->validator->validate($game);
+        self::assertEmpty($violations);
+    }
+
     private function createGameWithMoves(Position $position, MoveNode ...$nodes): Game
     {
         $game = new Game();

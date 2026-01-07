@@ -18,4 +18,12 @@ enum CastlingEnum: string
     {
         return ColorEnum::BLACK === $color ? self::BLACK_QUEENSIDE : self::WHITE_QUEENSIDE;
     }
+
+    public function color(): ColorEnum
+    {
+        return match ($this) {
+            self::WHITE_KINGSIDE, self::WHITE_QUEENSIDE => ColorEnum::WHITE,
+            self::BLACK_KINGSIDE, self::BLACK_QUEENSIDE => ColorEnum::BLACK,
+        };
+    }
 }

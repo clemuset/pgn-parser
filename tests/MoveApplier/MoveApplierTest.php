@@ -172,4 +172,15 @@ class MoveApplierTest extends TestCase
         $newPosition = $this->applier->apply($newPosition, $move);
         self::assertNull($newPosition->getEnPassantTarget());
     }
+
+    public function testCanCastling(): void
+    {
+        $position = Position::fromFEN('r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1');
+        $move = Move::fromSAN('O-O', ColorEnum::WHITE);
+        $newPosition = $this->applier->apply($position, $move);
+        self::assertSame(PieceEnum::WHITE_KING, $newPosition->getPieceAt(SquareEnum::G1));
+        self::assertSame(PieceEnum::WHITE_ROOK, $newPosition->getPieceAt(SquareEnum::F1));
+        self::assertNull($newPosition->getPieceAt(SquareEnum::E1));
+        self::assertNull($newPosition->getPieceAt(SquareEnum::H1));
+    }
 }

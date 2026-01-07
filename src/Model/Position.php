@@ -77,7 +77,7 @@ class Position
 
     public function toggleSideToMove(): void
     {
-        $this->sideToMove = ColorEnum::WHITE === $this->sideToMove ? ColorEnum::BLACK : ColorEnum::WHITE;
+        $this->sideToMove = $this->sideToMove->opposite();
     }
 
     public function getCastlingRights(): array
@@ -191,7 +191,7 @@ class Position
     /**
      * @return Square[]
      */
-    public function findAttackers(Square|SquareEnum $square): array
+    public function findAttackers(Square|SquareEnum $square, ColorEnum $attackerColor): array
     {
         $square = $square instanceof Square ? $square : $this->getSquare($square);
 
@@ -199,7 +199,7 @@ class Position
         foreach ($this->squares as $from) {
             $piece = $from->getPiece();
 
-            if (null === $piece || $piece->color() === $square->getPiece()?->color()) {
+            if (null === $piece || $piece->color() === $square->getPiece()?->color() || $piece->color() !== $attackerColor) {
                 continue;
             }
 
@@ -211,9 +211,9 @@ class Position
         return $attackers;
     }
 
-    public function hasAttacker(Square|SquareEnum $square): bool
+    public function hasAttacker(Square|SquareEnum $square, ColorEnum $attackerColor): bool
     {
-        return count($this->findAttackers($square)) > 0;
+        return count($this->findAttackers($square, $attackerColor)) > 0;
     }
 
     public function castlingIsAllowed(CastlingEnum $castling): bool
@@ -298,10 +298,10 @@ class Position
 
     public function isCheckmate(): bool
     {
-        $kingPiece = ColorEnum::WHITE === $this->sideToMove ? PieceEnum::WHITE_KING : PieceEnum::BLACK_KING;
+        $kingPiece = PieceEnum::king($this->sideToMove);
         $kingSquare = $this->findOne($kingPiece);
 
-        if (null === $kingSquare || !$this->hasAttacker($kingSquare)) {
+        if (null === $kingSquare || !$this->hasAttacker($kingSquare, $this->sideToMove->opposite())) {
             return false;
         }
 
@@ -312,22 +312,22 @@ class Position
 
     public function isCheck(): bool
     {
-        $kingPiece = ColorEnum::WHITE === $this->sideToMove ? PieceEnum::WHITE_KING : PieceEnum::BLACK_KING;
+        $kingPiece = PieceEnum::king($this->sideToMove);
         $kingSquare = $this->findOne($kingPiece);
 
         if (null === $kingSquare) {
             return false;
         }
 
-        return $this->hasAttacker($kingSquare);
+        return $this->hasAttacker($kingSquare, $this->sideToMove->opposite());
     }
 
     public function isStaleMate(): bool
     {
-        $kingPiece = ColorEnum::WHITE === $this->sideToMove ? PieceEnum::WHITE_KING : PieceEnum::BLACK_KING;
+        $kingPiece = PieceEnum::king($this->sideToMove);
         $kingSquare = $this->findOne($kingPiece);
 
-        if (null === $kingSquare || $this->hasAttacker($kingSquare)) {
+        if (null === $kingSquare || $this->hasAttacker($kingSquare, $this->sideToMove->opposite())) {
             return false;
         }
 

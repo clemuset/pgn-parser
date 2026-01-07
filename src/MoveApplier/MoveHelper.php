@@ -5,7 +5,6 @@ namespace Cmuset\PgnParser\MoveApplier;
 use Cmuset\PgnParser\Enum\CastlingEnum;
 use Cmuset\PgnParser\Enum\ColorEnum;
 use Cmuset\PgnParser\Enum\SquareEnum;
-use Cmuset\PgnParser\Model\Move;
 use Cmuset\PgnParser\Model\Position;
 
 class MoveHelper
@@ -22,12 +21,9 @@ class MoveHelper
             $squareName = chr($currentFileOrd) . $currentRank;
             $squareEnum = SquareEnum::tryFrom($squareName);
 
-            if (!$squareEnum) {
-                return false; // out of board
-            }
-
-            if (null !== $position->getPieceAt($squareEnum)) {
-                return false; // piece blocking the path
+            // Out of board || Piece blocking the path
+            if (!$squareEnum || null !== $position->getPieceAt($squareEnum)) {
+                return false;
             }
 
             $currentFileOrd += $fileStep;
@@ -132,23 +128,25 @@ class MoveHelper
 
     public static function areCastlingSquaresAttacked(Position $position, CastlingEnum $castling): bool
     {
+        $attackerColor = $castling->color()->opposite();
+
         switch ($castling) {
             case CastlingEnum::WHITE_KINGSIDE:
-                return $position->hasAttacker(SquareEnum::E1)
-                    || $position->hasAttacker(SquareEnum::F1)
-                    || $position->hasAttacker(SquareEnum::G1);
+                return $position->hasAttacker(SquareEnum::E1, $attackerColor)
+                    || $position->hasAttacker(SquareEnum::F1, $attackerColor)
+                    || $position->hasAttacker(SquareEnum::G1, $attackerColor);
             case CastlingEnum::WHITE_QUEENSIDE:
-                return $position->hasAttacker(SquareEnum::E1)
-                    || $position->hasAttacker(SquareEnum::D1)
-                    || $position->hasAttacker(SquareEnum::C1);
+                return $position->hasAttacker(SquareEnum::E1, $attackerColor)
+                    || $position->hasAttacker(SquareEnum::D1, $attackerColor)
+                    || $position->hasAttacker(SquareEnum::C1, $attackerColor);
             case CastlingEnum::BLACK_KINGSIDE:
-                return $position->hasAttacker(SquareEnum::E8)
-                    || $position->hasAttacker(SquareEnum::F8)
-                    || $position->hasAttacker(SquareEnum::G8);
+                return $position->hasAttacker(SquareEnum::E8, $attackerColor)
+                    || $position->hasAttacker(SquareEnum::F8, $attackerColor)
+                    || $position->hasAttacker(SquareEnum::G8, $attackerColor);
             case CastlingEnum::BLACK_QUEENSIDE:
-                return $position->hasAttacker(SquareEnum::E8)
-                    || $position->hasAttacker(SquareEnum::D8)
-                    || $position->hasAttacker(SquareEnum::C8);
+                return $position->hasAttacker(SquareEnum::E8, $attackerColor)
+                    || $position->hasAttacker(SquareEnum::D8, $attackerColor)
+                    || $position->hasAttacker(SquareEnum::C8, $attackerColor);
             default:
                 throw new \RuntimeException('Invalid castling enum');
         }
