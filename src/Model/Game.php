@@ -11,9 +11,9 @@ class Game
 {
     /** @var array<string,string> */
     private array $tags = [];
-    private Position $initialPosition;
+    private ?Position $initialPosition = null;
     /** @var array<MoveNode> */
-    private array $mainLine;
+    private array $mainLine = [];
     private ?ResultEnum $result = null;
 
     public static function fromPGN(string $pgn): self
@@ -24,6 +24,15 @@ class Game
     public function getPGN(): string
     {
         return GameExporter::create()->export($this);
+    }
+
+    public function getLitePGN(): string
+    {
+        $clonedGame = clone $this;
+        $clonedGame->clearAllComments();
+        $clonedGame->tags = [];
+
+        return GameExporter::create()->export($clonedGame);
     }
 
     public function getInitialPosition(): Position
@@ -94,5 +103,23 @@ class Game
     public function setResult(?ResultEnum $result): void
     {
         $this->result = $result;
+    }
+
+    public function clearAllComments(): void
+    {
+        foreach ($this->mainLine as $moveNode) {
+            $moveNode->clearAllComments();
+        }
+    }
+
+    public function __clone(): void
+    {
+        $clonedMainLine = [];
+        foreach ($this->mainLine as $key => $moveNode) {
+            $clonedMainLine[$key] = clone $moveNode;
+        }
+        $this->mainLine = $clonedMainLine;
+
+        $this->initialPosition = $this->initialPosition ? clone $this->initialPosition : null;
     }
 }

@@ -117,4 +117,38 @@ class MoveNode
     {
         $this->variations[] = $variationLine;
     }
+
+    public function clearAllComments(): void
+    {
+        $this->clearComments();
+        $this->clearVariationComments();
+    }
+
+    public function clearComments(): void
+    {
+        $this->setBeforeMoveComment(null);
+        $this->setAfterMoveComment(null);
+    }
+
+    public function clearVariationComments(): void
+    {
+        foreach ($this->getVariations() as $variationLine) {
+            foreach ($variationLine as $moveNode) {
+                $moveNode->clearAllComments();
+            }
+        }
+    }
+
+    public function __clone(): void
+    {
+        $clonedVariations = [];
+        foreach ($this->variations as $variationLine) {
+            $clonedLine = [];
+            foreach ($variationLine as $moveNode) {
+                $clonedLine[] = clone $moveNode;
+            }
+            $clonedVariations[] = $clonedLine;
+        }
+        $this->variations = $clonedVariations;
+    }
 }
