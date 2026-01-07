@@ -20,6 +20,8 @@ Built with modern PHP 8.4 features (Enums, typed properties) and released under 
    - [Exporting Back to PGN](#exporting-back-to-pgn)
    - [Parsing SAN Moves](#parsing-san-moves)
    - [Parsing / Exporting FEN Positions](#parsing--exporting-fen-positions)
+   - [Applying Moves (MoveApplier)](#applying-moves-moveapplier)
+   - [Validation (PositionValidator & GameValidator)](#validation-positionvalidator--gamevalidator)
 5. [Data Model Overview](#5-data-model-overview)
 6. [Enums Reference](#6-enums-reference)
 7. [Testing & Development](#7-testing--development)
@@ -66,6 +68,12 @@ foreach ($game->getMainLine() as $key => $node) {
   - FEN (`PositionExporter`) – implicitly via `Position::getFEN()`
 - Access structured comments (before / after a move) and NAGs
 - Access variations as arrays of `MoveNode` lines
+- Apply moves to positions with `MoveApplier` / `Position::applyMove()`:
+  - Handles castling (incl. rights update), en passant (capture + target square), promotions, capture detection, halfmove/fullmove counters, and side-to-move toggling
+  - Throws `MoveApplyingException` with `MoveViolationEnum` and, when relevant, embedded `PositionViolationEnum[]`
+- Validate positions and games:
+  - `PositionValidator` checks king presence/uniqueness, and whether the side to move is in check, etc.
+  - `GameValidator` simulates the main line and variations, returning an array of violations (`ViolationEnumInterface[]`) for the first failing move encountered
 
 ## 4. Usage Guide
 
@@ -131,7 +139,7 @@ foreach ($game->getMainLine() as $key => $node) {
     foreach ($node->getVariations() as $i => $variationLine) {
         echo "(Variation #" . $i . ")\n"; // e.g. "(Variation #1)"
         foreach ($variationLine as $vNode) {
-            echo $vNode->getMoveNumber() . ' ' . $vNode->getColor()->name . ' ' . $vNode->getMove()->getSAN() . // e.g. "6 WHITE d5"
+            echo $vNode->getMoveNumber() . ' ' . $vNode->getColor()->name . ' ' . $vNode->getMove()->getSAN(); // e.g. "6 WHITE d5"
         }
     }
 }
@@ -175,15 +183,61 @@ $position->setPieceAt(SquareEnum::e2(), null); // removes piece from e2
 echo $position->getFEN(); // e.g. "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1"
 ```
 
+### Applying Moves (MoveApplier)
+
+Apply a SAN move to a `Position`, with full rules handling (castling rights, en passant, promotion, counters):
+
+```php
+use Cmuset\PgnParser\Model\Position;
+use Cmuset\PgnParser\Model\Move;
+use Cmuset\PgnParser\Enum\ColorEnum;
+use Cmuset\PgnParser\Parser\PGNParser;
+use Cmuset\PgnParser\Exception\MoveApplyingException;
+
+$pos = Position::fromFEN(PGNParser::INITIAL_FEN);
+try {
+    $pos = $pos->applyMove(Move::fromSAN('e4', ColorEnum::WHITE));
+    // $pos->getSideToMove() is now BLACK; halfmove/fullmove counters updated; castling rights maintained
+} catch (MoveApplyingException $e) {
+    // Inspect the violation(s)
+    $moveViolation = $e->getMoveViolation(); // MoveViolationEnum|null
+    $positionViolations = $e->getPositionViolations(); // PositionViolationEnum[]
+}
+
+// Generate legal moves for the side to move
+$legalMoves = $pos->getLegalMoves(); // array of Move
+```
+
+### Validation (PositionValidator & GameValidator)
+
+Validate a single position or a full game (main line + variations):
+
+```php
+use Cmuset\PgnParser\Validator\PositionValidator;
+use Cmuset\PgnParser\Validator\GameValidator;
+use Cmuset\PgnParser\Model\Game;
+
+$posViolations = (new PositionValidator())->validate($pos); // PositionViolationEnum[]
+
+$game = Game::fromPGN($somePgn);
+$violations = (new GameValidator())->validate($game); // ViolationEnumInterface[] (may contain MoveViolationEnum and/or PositionViolationEnum)
+
+if (empty($violations)) {
+    // The game main line and its variations are valid
+}
+```
+
+Common position checks include: presence of both kings, uniqueness (no duplicates), king-in-check for the side to move, and basic legality context for derived positions.
+
 ## 5. Data Model Overview
 
-| Class           | Purpose |
-|-----------------|---------|
-| `Game`          | Represents a full PGN game (tags, initial position, main line, result) |
-| `MoveNode`      | A node in the move tree (move + comments + NAGs + variations) |
-| `Move`          | A parsed SAN move (piece, destination, capture, promotion, etc.) |
-| `Position`      | A FEN-described board state with piece placement and metadata |
-| `Square`        | A board square container (enum + piece) |
+| Class      | Purpose                                                                |
+|------------|------------------------------------------------------------------------|
+| `Game`     | Represents a full PGN game (tags, initial position, main line, result) |
+| `MoveNode` | A node in the move tree (move + comments + NAGs + variations)          |
+| `Move`     | A parsed SAN move (piece, destination, capture, promotion, etc.)       |
+| `Position` | A FEN-described board state with piece placement and metadata          |
+| `Square`   | A board square container (enum + piece)                                |
 
 Exporters (`GameExporter`, `MoveExporter`, `PositionExporter`) turn objects back into textual notation.
 
@@ -196,6 +250,8 @@ Parsers (`PGNParser`, `SANParser`, `FENParser`) transform strings into structure
 - `SquareEnum`: All 64 squares (`a1` .. `h8`)
 - `CastlingEnum`: Encodes side + direction
 - `ResultEnum`: `1-0`, `0-1`, `1/2-1/2`, `*`
+- `MoveViolationEnum`: Move-level violations (e.g., wrong color to move, no piece to capture, not-a-check, castling not allowed, etc.)
+- `PositionViolationEnum`: Position-level violations (e.g., missing king, multiple kings, king in check, etc.)
 
 ## 7. Testing & Development
 
@@ -216,7 +272,7 @@ vendor/bin/phpunit
 Static analysis & coding style:
 
 ```bash
-vendor/bin/phpstan analyse
+vendor/bin/phpstan analyze
 vendor/bin/php-cs-fixer fix --dry-run
 ```
 

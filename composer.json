@@ -1,7 +1,7 @@
 {
     "name": "cmuset/pgn-parser",
     "description": "A PGN (Portable Game Notation) parser for chess games.",
-    "keywords": ["chess", "pgn", "parser", "fen", "san"],
+    "keywords": ["chess", "pgn", "parser", "fen", "san", "validator", "applier"],
     "type": "library",
     "license": "MIT",
     "autoload": {
