@@ -3,15 +3,17 @@
 namespace Cmuset\PgnParser\Tests\Validator;
 
 use Cmuset\PgnParser\Enum\ColorEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
-use Cmuset\PgnParser\Enum\Violation\MoveViolationEnum;
 use Cmuset\PgnParser\Model\Game;
 use Cmuset\PgnParser\Model\Move;
 use Cmuset\PgnParser\Model\MoveNode;
 use Cmuset\PgnParser\Model\Position;
 use Cmuset\PgnParser\Parser\PGNParser;
+use Cmuset\PgnParser\Validator\Enum\MoveViolationEnum;
+use Cmuset\PgnParser\Validator\Enum\PositionViolationEnum;
 use Cmuset\PgnParser\Validator\GameValidator;
+use Cmuset\PgnParser\Validator\Model\GameViolation;
 use PHPUnit\Framework\TestCase;
 
 class GameValidatorTest extends TestCase
@@ -31,19 +33,20 @@ class GameValidatorTest extends TestCase
             $this->createMoveNode('e5', ColorEnum::BLACK),
         );
 
-        self::assertEmpty($this->validator->validate($game));
+        self::assertNull($this->validator->validate($game));
     }
 
     public function testWrongColorMoveDetected(): void
     {
         $game = $this->createGameWithMoves(
             Position::fromFEN(PGNParser::INITIAL_FEN),
-            $this->createMoveNode('e5', ColorEnum::BLACK, 1),
+            $this->createMoveNode('e5', ColorEnum::BLACK),
         );
 
-        $violations = $this->validator->validate($game);
-        self::assertNotEmpty($violations);
-        self::assertTrue(in_array(MoveViolationEnum::WRONG_COLOR_TO_MOVE, $violations, true));
+        $violation = $this->validator->validate($game);
+        self::assertInstanceOf(GameViolation::class, $violation);
+        self::assertEquals(MoveViolationEnum::WRONG_COLOR_TO_MOVE, $violation->getMoveViolation());
+        self::assertEquals('1...', $violation->getPath());
     }
 
     public function testCaptureWithoutTargetDetected(): void
@@ -51,24 +54,26 @@ class GameValidatorTest extends TestCase
         $position = Position::fromFEN('r3k3/8/8/8/8/8/8/4K3 b - - 0 1');
         $game = $this->createGameWithMoves($position, $this->createMoveNode('Rxa1', ColorEnum::BLACK));
 
-        $violations = $this->validator->validate($game);
-        self::assertNotEmpty($violations);
-        self::assertTrue(in_array(MoveViolationEnum::NO_PIECE_TO_CAPTURE, $violations, true));
+        $violation = $this->validator->validate($game);
+        self::assertInstanceOf(GameViolation::class, $violation);
+        self::assertEquals(MoveViolationEnum::NO_PIECE_TO_CAPTURE, $violation->getMoveViolation());
+        self::assertEquals('1...', $violation->getPath());
     }
 
     public function testTargetSquareOccupiedByOwnPieceDetected(): void
     {
         $position = Position::fromFEN('8/8/8/8/8/8/8/8 w - - 0 1');
-        $position->setPieceAt(SquareEnum::E1, PieceEnum::WHITE_KING);
-        $position->setPieceAt(SquareEnum::E8, PieceEnum::BLACK_KING);
-        $position->setPieceAt(SquareEnum::G1, PieceEnum::WHITE_KNIGHT);
-        $position->setPieceAt(SquareEnum::F3, PieceEnum::WHITE_PAWN);
+        $position->setPieceAt(CoordinatesEnum::E1, PieceEnum::WHITE_KING);
+        $position->setPieceAt(CoordinatesEnum::E8, PieceEnum::BLACK_KING);
+        $position->setPieceAt(CoordinatesEnum::G1, PieceEnum::WHITE_KNIGHT);
+        $position->setPieceAt(CoordinatesEnum::F3, PieceEnum::WHITE_PAWN);
 
         $game = $this->createGameWithMoves($position, $this->createMoveNode('Nf3', ColorEnum::WHITE));
 
-        $violations = $this->validator->validate($game);
-        self::assertNotEmpty($violations);
-        self::assertTrue(in_array(MoveViolationEnum::SQUARE_OCCUPIED_BY_OWN_PIECE, $violations, true));
+        $violation = $this->validator->validate($game);
+        self::assertInstanceOf(GameViolation::class, $violation);
+        self::assertEquals(MoveViolationEnum::SQUARE_OCCUPIED_BY_OWN_PIECE, $violation->getMoveViolation());
+        self::assertEquals('1.', $violation->getPath());
     }
 
     public function testPieceNotFoundDetected(): void
@@ -76,24 +81,26 @@ class GameValidatorTest extends TestCase
         $position = Position::fromFEN('4k3/8/8/8/8/8/8/4K3 w - - 0 1');
         $game = $this->createGameWithMoves($position, $this->createMoveNode('Qh4', ColorEnum::WHITE));
 
-        $violations = $this->validator->validate($game);
-        self::assertNotEmpty($violations);
-        self::assertTrue(in_array(MoveViolationEnum::PIECE_NOT_FOUND, $violations, true));
+        $violation = $this->validator->validate($game);
+        self::assertInstanceOf(GameViolation::class, $violation);
+        self::assertEquals(MoveViolationEnum::PIECE_NOT_FOUND, $violation->getMoveViolation());
+        self::assertEquals('1.', $violation->getPath());
     }
 
     public function testMultiplePiecesMatchDetected(): void
     {
         $position = Position::fromFEN('8/8/8/8/8/8/8/8 w - - 0 1');
-        $position->setPieceAt(SquareEnum::E1, PieceEnum::WHITE_KING);
-        $position->setPieceAt(SquareEnum::E8, PieceEnum::BLACK_KING);
-        $position->setPieceAt(SquareEnum::D4, PieceEnum::WHITE_KNIGHT);
-        $position->setPieceAt(SquareEnum::H4, PieceEnum::WHITE_KNIGHT);
+        $position->setPieceAt(CoordinatesEnum::E1, PieceEnum::WHITE_KING);
+        $position->setPieceAt(CoordinatesEnum::E8, PieceEnum::BLACK_KING);
+        $position->setPieceAt(CoordinatesEnum::D4, PieceEnum::WHITE_KNIGHT);
+        $position->setPieceAt(CoordinatesEnum::H4, PieceEnum::WHITE_KNIGHT);
 
         $game = $this->createGameWithMoves($position, $this->createMoveNode('Nf3', ColorEnum::WHITE));
 
-        $violations = $this->validator->validate($game);
-        self::assertNotEmpty($violations);
-        self::assertTrue(in_array(MoveViolationEnum::MULTIPLE_PIECES_MATCH, $violations, true));
+        $violation = $this->validator->validate($game);
+        self::assertInstanceOf(GameViolation::class, $violation);
+        self::assertEquals(MoveViolationEnum::MULTIPLE_PIECES_MATCH, $violation->getMoveViolation());
+        self::assertEquals('1.', $violation->getPath());
     }
 
     public function testCastlingNotAllowedDetected(): void
@@ -101,24 +108,27 @@ class GameValidatorTest extends TestCase
         $position = Position::fromFEN('4k3/8/8/8/8/8/8/4K2R w - - 0 1');
         $game = $this->createGameWithMoves($position, $this->createMoveNode('O-O', ColorEnum::WHITE));
 
-        $violations = $this->validator->validate($game);
-        self::assertNotEmpty($violations);
-        self::assertTrue(in_array(MoveViolationEnum::CASTLING_IS_NOT_ALLOWED, $violations, true));
+        $violation = $this->validator->validate($game);
+        self::assertInstanceOf(GameViolation::class, $violation);
+        self::assertEquals(MoveViolationEnum::CASTLING_IS_NOT_ALLOWED, $violation->getMoveViolation());
+        self::assertEquals('1.', $violation->getPath());
     }
 
     public function testNextPositionInvalidDetected(): void
     {
         $position = Position::fromFEN('8/8/8/8/8/8/8/8 w - - 0 1');
-        $position->setPieceAt(SquareEnum::E1, PieceEnum::WHITE_KING);
-        $position->setPieceAt(SquareEnum::D1, PieceEnum::WHITE_KING);
-        $position->setPieceAt(SquareEnum::E8, PieceEnum::BLACK_KING);
-        $position->setPieceAt(SquareEnum::E2, PieceEnum::WHITE_PAWN);
+        $position->setPieceAt(CoordinatesEnum::E1, PieceEnum::WHITE_KING);
+        $position->setPieceAt(CoordinatesEnum::D1, PieceEnum::WHITE_KING);
+        $position->setPieceAt(CoordinatesEnum::E8, PieceEnum::BLACK_KING);
+        $position->setPieceAt(CoordinatesEnum::E2, PieceEnum::WHITE_PAWN);
 
         $game = $this->createGameWithMoves($position, $this->createMoveNode('e3', ColorEnum::WHITE));
 
-        $violations = $this->validator->validate($game);
-        self::assertNotEmpty($violations);
-        self::assertTrue(in_array(MoveViolationEnum::NEXT_POSITION_INVALID, $violations, true));
+        $violation = $this->validator->validate($game);
+        self::assertInstanceOf(GameViolation::class, $violation);
+        self::assertEquals('1.', $violation->getPath());
+        self::assertEquals(MoveViolationEnum::NEXT_POSITION_INVALID, $violation->getMoveViolation());
+        self::assertContains(PositionViolationEnum::MULTIPLE_WHITE_KINGS, $violation->getPositionViolations());
     }
 
     public function testMoveNotCheckDetected(): void
@@ -126,9 +136,10 @@ class GameValidatorTest extends TestCase
         $position = Position::fromFEN('4k3/8/8/8/8/4P3/8/4KQ2 w - - 0 1');
         $game = $this->createGameWithMoves($position, $this->createMoveNode('Qe2+', ColorEnum::WHITE));
 
-        $violations = $this->validator->validate($game);
-        self::assertNotEmpty($violations);
-        self::assertTrue(in_array(MoveViolationEnum::MOVE_NOT_CHECK, $violations, true));
+        $violation = $this->validator->validate($game);
+        self::assertInstanceOf(GameViolation::class, $violation);
+        self::assertEquals(MoveViolationEnum::MOVE_NOT_CHECK, $violation->getMoveViolation());
+        self::assertEquals('1.', $violation->getPath());
     }
 
     public function testMoveNotCheckmateDetected(): void
@@ -136,9 +147,10 @@ class GameValidatorTest extends TestCase
         $position = Position::fromFEN('4k3/8/8/8/8/4P3/8/4KQ2 w - - 0 1');
         $game = $this->createGameWithMoves($position, $this->createMoveNode('Qe2#', ColorEnum::WHITE));
 
-        $violations = $this->validator->validate($game);
-        self::assertNotEmpty($violations);
-        self::assertTrue(in_array(MoveViolationEnum::MOVE_NOT_CHECKMATE, $violations, true));
+        $violation = $this->validator->validate($game);
+        self::assertInstanceOf(GameViolation::class, $violation);
+        self::assertEquals(MoveViolationEnum::MOVE_NOT_CHECKMATE, $violation->getMoveViolation());
+        self::assertEquals('1.', $violation->getPath());
     }
 
     public function testOperaGameHasNoViolations(): void
@@ -152,8 +164,40 @@ class GameValidatorTest extends TestCase
 
         $game = Game::fromPGN($pgn);
 
-        $violations = $this->validator->validate($game);
-        self::assertEmpty($violations);
+        $violation = $this->validator->validate($game);
+        self::assertNull($violation);
+    }
+
+    public function testGameViolationInNestedVariation(): void
+    {
+        $position = Position::fromFEN(PGNParser::INITIAL_FEN);
+        $game = $this->createGameWithMoves(
+            $position,
+            $this->createMoveNode('e4', ColorEnum::WHITE),
+            $this->createMoveNode('e5', ColorEnum::BLACK),
+            $lastNode = $this->createMoveNode('d3', ColorEnum::WHITE),
+        );
+
+        $lastNode->addVariation([
+            $this->createMoveNode('Nc3', ColorEnum::WHITE, 2),
+            $this->createMoveNode('Nc6', ColorEnum::BLACK, 2),
+        ]);
+
+        $lastNode->addVariation([
+            $this->createMoveNode('Nf3', ColorEnum::WHITE, 2),
+            $this->createMoveNode('Nc6', ColorEnum::BLACK, 2),
+            $this->createMoveNode('Bb5', ColorEnum::WHITE, 3),
+            $this->createMoveNode('Nf6', ColorEnum::BLACK, 3),
+            $this->createMoveNode('O-O', ColorEnum::WHITE, 4),
+            $lastNode = $this->createMoveNode('Be7', ColorEnum::BLACK, 4),
+        ]);
+
+        $lastNode->addVariation([$this->createMoveNode('O-O-O', ColorEnum::BLACK, 4)]);
+
+        $violation = $this->validator->validate($game);
+        self::assertInstanceOf(GameViolation::class, $violation);
+        self::assertEquals(MoveViolationEnum::CASTLING_IS_NOT_ALLOWED, $violation->getMoveViolation());
+        self::assertEquals('2.[1]4...[0]4...', $violation->getPath()); // path to O-O-O move
     }
 
     private function createGameWithMoves(Position $position, MoveNode ...$nodes): Game
@@ -168,11 +212,10 @@ class GameValidatorTest extends TestCase
         return $game;
     }
 
-    private function createMoveNode(string $san, ColorEnum $color, int $moveNumber = 1): MoveNode
+    private function createMoveNode(string $san, ColorEnum $color, ?int $moveNumber = null): MoveNode
     {
         $node = new MoveNode();
         $node->setMove(Move::fromSAN($san, $color));
-        $node->setColor($color);
         $node->setMoveNumber($moveNumber);
 
         return $node;

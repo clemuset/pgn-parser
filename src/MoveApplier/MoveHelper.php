@@ -4,12 +4,12 @@ namespace Cmuset\PgnParser\MoveApplier;
 
 use Cmuset\PgnParser\Enum\CastlingEnum;
 use Cmuset\PgnParser\Enum\ColorEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Model\Position;
 
 class MoveHelper
 {
-    public static function isPathClear(SquareEnum $from, SquareEnum $to, Position $position): bool
+    public static function isPathClear(CoordinatesEnum $from, CoordinatesEnum $to, Position $position): bool
     {
         $fileStep = self::sign(ord($to->file()) - ord($from->file()));
         $rankStep = self::sign($to->rank() - $from->rank());
@@ -18,11 +18,11 @@ class MoveHelper
         $currentRank = $from->rank() + $rankStep;
 
         while ($currentFileOrd !== ord($to->file()) || $currentRank !== $to->rank()) {
-            $squareName = chr($currentFileOrd) . $currentRank;
-            $squareEnum = SquareEnum::tryFrom($squareName);
+            $coordinatesStr = chr($currentFileOrd) . $currentRank;
+            $coordinates = CoordinatesEnum::tryFrom($coordinatesStr);
 
             // Out of board || Piece blocking the path
-            if (!$squareEnum || null !== $position->getPieceAt($squareEnum)) {
+            if (!$coordinates || null !== $position->getPieceAt($coordinates)) {
                 return false;
             }
 
@@ -33,7 +33,7 @@ class MoveHelper
         return true;
     }
 
-    public static function isSlidingMove(SquareEnum $from, SquareEnum $to): bool
+    public static function isSlidingMove(CoordinatesEnum $from, CoordinatesEnum $to): bool
     {
         $fileDiff = ord($to->file()) - ord($from->file());
         $rankDiff = $to->rank() - $from->rank();
@@ -41,22 +41,22 @@ class MoveHelper
         return $from !== $to && abs($fileDiff) === abs($rankDiff);
     }
 
-    public static function isVerticalMove(SquareEnum $from, SquareEnum $to): bool
+    public static function isVerticalMove(CoordinatesEnum $from, CoordinatesEnum $to): bool
     {
         return $from->file() === $to->file() && $from->rank() !== $to->rank();
     }
 
-    public static function isHorizontalMove(SquareEnum $from, SquareEnum $to): bool
+    public static function isHorizontalMove(CoordinatesEnum $from, CoordinatesEnum $to): bool
     {
         return $from->rank() === $to->rank() && $from->file() !== $to->file();
     }
 
-    public static function isStraightMove(SquareEnum $from, SquareEnum $to): bool
+    public static function isStraightMove(CoordinatesEnum $from, CoordinatesEnum $to): bool
     {
         return self::isVerticalMove($from, $to) || self::isHorizontalMove($from, $to);
     }
 
-    public static function isKnightMove(SquareEnum $from, SquareEnum $to): bool
+    public static function isKnightMove(CoordinatesEnum $from, CoordinatesEnum $to): bool
     {
         $fileDiff = abs(ord($to->file()) - ord($from->file()));
         $rankDiff = abs($to->rank() - $from->rank());
@@ -64,7 +64,7 @@ class MoveHelper
         return (2 === $fileDiff && 1 === $rankDiff) || (1 === $fileDiff && 2 === $rankDiff);
     }
 
-    public static function isPawnMove(SquareEnum $from, SquareEnum $to, ColorEnum $colorEnum): bool
+    public static function isPawnMove(CoordinatesEnum $from, CoordinatesEnum $to, ColorEnum $colorEnum): bool
     {
         $fileDiff = ord($to->file()) - ord($from->file());
         $rankDiff = $to->rank() - $from->rank();
@@ -87,7 +87,7 @@ class MoveHelper
         return false;
     }
 
-    public static function isPawnCaptureMove(SquareEnum $from, SquareEnum $to, ColorEnum $colorEnum): bool
+    public static function isPawnCaptureMove(CoordinatesEnum $from, CoordinatesEnum $to, ColorEnum $colorEnum): bool
     {
         $fileDiff = ord($to->file()) - ord($from->file());
         $rankDiff = $to->rank() - $from->rank();
@@ -102,7 +102,7 @@ class MoveHelper
         return false;
     }
 
-    public static function isKingMove(SquareEnum $from, SquareEnum $to): bool
+    public static function isKingMove(CoordinatesEnum $from, CoordinatesEnum $to): bool
     {
         $fileDiff = abs(ord($to->file()) - ord($from->file()));
         $rankDiff = abs($to->rank() - $from->rank());
@@ -114,13 +114,13 @@ class MoveHelper
     {
         switch ($castling) {
             case CastlingEnum::WHITE_KINGSIDE:
-                return self::isPathClear(SquareEnum::E1, SquareEnum::G1, $position);
+                return self::isPathClear(CoordinatesEnum::E1, CoordinatesEnum::G1, $position);
             case CastlingEnum::WHITE_QUEENSIDE:
-                return self::isPathClear(SquareEnum::E1, SquareEnum::C1, $position);
+                return self::isPathClear(CoordinatesEnum::E1, CoordinatesEnum::C1, $position);
             case CastlingEnum::BLACK_KINGSIDE:
-                return self::isPathClear(SquareEnum::E8, SquareEnum::G8, $position);
+                return self::isPathClear(CoordinatesEnum::E8, CoordinatesEnum::G8, $position);
             case CastlingEnum::BLACK_QUEENSIDE:
-                return self::isPathClear(SquareEnum::E8, SquareEnum::C8, $position);
+                return self::isPathClear(CoordinatesEnum::E8, CoordinatesEnum::C8, $position);
             default:
                 return false;
         }
@@ -132,42 +132,30 @@ class MoveHelper
 
         switch ($castling) {
             case CastlingEnum::WHITE_KINGSIDE:
-                return $position->hasAttacker(SquareEnum::E1, $attackerColor)
-                    || $position->hasAttacker(SquareEnum::F1, $attackerColor)
-                    || $position->hasAttacker(SquareEnum::G1, $attackerColor);
+                return $position->hasAttacker(CoordinatesEnum::E1, $attackerColor)
+                    || $position->hasAttacker(CoordinatesEnum::F1, $attackerColor)
+                    || $position->hasAttacker(CoordinatesEnum::G1, $attackerColor);
             case CastlingEnum::WHITE_QUEENSIDE:
-                return $position->hasAttacker(SquareEnum::E1, $attackerColor)
-                    || $position->hasAttacker(SquareEnum::D1, $attackerColor)
-                    || $position->hasAttacker(SquareEnum::C1, $attackerColor);
+                return $position->hasAttacker(CoordinatesEnum::E1, $attackerColor)
+                    || $position->hasAttacker(CoordinatesEnum::D1, $attackerColor)
+                    || $position->hasAttacker(CoordinatesEnum::C1, $attackerColor);
             case CastlingEnum::BLACK_KINGSIDE:
-                return $position->hasAttacker(SquareEnum::E8, $attackerColor)
-                    || $position->hasAttacker(SquareEnum::F8, $attackerColor)
-                    || $position->hasAttacker(SquareEnum::G8, $attackerColor);
+                return $position->hasAttacker(CoordinatesEnum::E8, $attackerColor)
+                    || $position->hasAttacker(CoordinatesEnum::F8, $attackerColor)
+                    || $position->hasAttacker(CoordinatesEnum::G8, $attackerColor);
             case CastlingEnum::BLACK_QUEENSIDE:
-                return $position->hasAttacker(SquareEnum::E8, $attackerColor)
-                    || $position->hasAttacker(SquareEnum::D8, $attackerColor)
-                    || $position->hasAttacker(SquareEnum::C8, $attackerColor);
+                return $position->hasAttacker(CoordinatesEnum::E8, $attackerColor)
+                    || $position->hasAttacker(CoordinatesEnum::D8, $attackerColor)
+                    || $position->hasAttacker(CoordinatesEnum::C8, $attackerColor);
             default:
                 throw new \RuntimeException('Invalid castling enum');
         }
     }
 
-    public static function getRookKingCastlingSquare(ColorEnum $color): SquareEnum
-    {
-        return ColorEnum::WHITE === $color ? SquareEnum::F1 : SquareEnum::F8;
-    }
-
-    public static function getRookQueenCastlingSquare(ColorEnum $color): SquareEnum
-    {
-        return ColorEnum::WHITE === $color ? SquareEnum::D1 : SquareEnum::D8;
-    }
-
     private static function sign(int $value): int
     {
-        if (0 === $value) {
-            return 0;
-        }
-
-        return $value > 0 ? 1 : -1;
+        return 0 === $value
+        ? 0
+        : ($value > 0 ? 1 : -1);
     }
 }

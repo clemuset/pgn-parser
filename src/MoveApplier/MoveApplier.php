@@ -4,9 +4,8 @@ namespace Cmuset\PgnParser\MoveApplier;
 
 use Cmuset\PgnParser\Enum\CastlingEnum;
 use Cmuset\PgnParser\Enum\ColorEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
-use Cmuset\PgnParser\Enum\Violation\MoveViolationEnum;
 use Cmuset\PgnParser\Exception\MoveApplyingException;
 use Cmuset\PgnParser\Model\Move;
 use Cmuset\PgnParser\Model\Position;
@@ -16,6 +15,7 @@ use Cmuset\PgnParser\MoveApplier\PieceMoveApplier\KnightMoveApplier;
 use Cmuset\PgnParser\MoveApplier\PieceMoveApplier\PawnMoveApplier;
 use Cmuset\PgnParser\MoveApplier\PieceMoveApplier\QueenMoveApplier;
 use Cmuset\PgnParser\MoveApplier\PieceMoveApplier\RookMoveApplier;
+use Cmuset\PgnParser\Validator\Enum\MoveViolationEnum;
 use Cmuset\PgnParser\Validator\PositionValidator;
 
 class MoveApplier
@@ -71,29 +71,29 @@ class MoveApplier
 
     private function handleCastlingRights(Position $position, Move $move): void
     {
-        if (null === $position->getPieceAt(SquareEnum::E8) || SquareEnum::E8 === $move->getTo()) {
+        if (null === $position->getPieceAt(CoordinatesEnum::E8) || CoordinatesEnum::E8 === $move->getTo()) {
             $position->removeCastlingRight(CastlingEnum::BLACK_KINGSIDE);
             $position->removeCastlingRight(CastlingEnum::BLACK_QUEENSIDE);
         }
 
-        if (null === $position->getPieceAt(SquareEnum::E1) || SquareEnum::E1 === $move->getTo()) {
+        if (null === $position->getPieceAt(CoordinatesEnum::E1) || CoordinatesEnum::E1 === $move->getTo()) {
             $position->removeCastlingRight(CastlingEnum::WHITE_KINGSIDE);
             $position->removeCastlingRight(CastlingEnum::WHITE_QUEENSIDE);
         }
 
-        if (null === $position->getPieceAt(SquareEnum::A1) || SquareEnum::A1 === $move->getTo()) {
+        if (null === $position->getPieceAt(CoordinatesEnum::A1) || CoordinatesEnum::A1 === $move->getTo()) {
             $position->removeCastlingRight(CastlingEnum::WHITE_QUEENSIDE);
         }
 
-        if (null === $position->getPieceAt(SquareEnum::H1) || SquareEnum::H1 === $move->getTo()) {
+        if (null === $position->getPieceAt(CoordinatesEnum::H1) || CoordinatesEnum::H1 === $move->getTo()) {
             $position->removeCastlingRight(CastlingEnum::WHITE_KINGSIDE);
         }
 
-        if (null === $position->getPieceAt(SquareEnum::A8) || SquareEnum::A8 === $move->getTo()) {
+        if (null === $position->getPieceAt(CoordinatesEnum::A8) || CoordinatesEnum::A8 === $move->getTo()) {
             $position->removeCastlingRight(CastlingEnum::BLACK_QUEENSIDE);
         }
 
-        if (null === $position->getPieceAt(SquareEnum::H8) || SquareEnum::H8 === $move->getTo()) {
+        if (null === $position->getPieceAt(CoordinatesEnum::H8) || CoordinatesEnum::H8 === $move->getTo()) {
             $position->removeCastlingRight(CastlingEnum::BLACK_KINGSIDE);
         }
     }

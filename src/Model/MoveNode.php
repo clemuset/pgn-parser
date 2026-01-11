@@ -9,7 +9,6 @@ class MoveNode
 {
     private ?Move $move = null;
     private ?int $moveNumber = null;
-    private ?ColorEnum $color = null;
     private ?string $afterMoveComment = null;
     private ?string $beforeMoveComment = null;
 
@@ -41,12 +40,7 @@ class MoveNode
 
     public function getColor(): ?ColorEnum
     {
-        return $this->color;
-    }
-
-    public function setColor(?ColorEnum $color): void
-    {
-        $this->color = $color;
+        return $this->move->getPiece()->color();
     }
 
     public function getBeforeMoveComment(): ?string
@@ -116,6 +110,14 @@ class MoveNode
     public function addVariation(array $variationLine): void
     {
         $this->variations[] = $variationLine;
+    }
+
+    public function getKey(): string
+    {
+        $moveNumber = $this->getMoveNumber();
+        $colorSuffix = ColorEnum::WHITE === $this->getColor() ? '.' : '...';
+
+        return null !== $moveNumber ? $moveNumber . $colorSuffix : '';
     }
 
     public function clearAllComments(): void

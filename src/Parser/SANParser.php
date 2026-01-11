@@ -4,8 +4,8 @@ namespace Cmuset\PgnParser\Parser;
 
 use Cmuset\PgnParser\Enum\CastlingEnum;
 use Cmuset\PgnParser\Enum\ColorEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
 use Cmuset\PgnParser\Exception\SANParsingException;
 use Cmuset\PgnParser\Model\Move;
 
@@ -26,11 +26,11 @@ class SANParser implements SANParserInterface
         $move->setPiece($this->mapPieceLetter($this->extractPieceMoved($san), $color));
 
         if ($to = $this->extractDestinationSquare($san)) {
-            $move->setTo(SquareEnum::from($to));
+            $move->setTo(CoordinatesEnum::from($to));
         }
 
         if ($disamb = $this->extractDisambiguationPart($san)) {
-            $move->setSquareFrom(SquareEnum::tryFrom($disamb));
+            $move->setSquareFrom(CoordinatesEnum::tryFrom($disamb));
         }
 
         $move->setFileFrom($this->extractFileFrom($san));

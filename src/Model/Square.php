@@ -2,20 +2,20 @@
 
 namespace Cmuset\PgnParser\Model;
 
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
 
 class Square
 {
     public function __construct(
-        private readonly SquareEnum $square,
+        private readonly CoordinatesEnum $coordinates,
         private ?PieceEnum $piece = null
     ) {
     }
 
-    public function getSquare(): SquareEnum
+    public function getCoordinates(): CoordinatesEnum
     {
-        return $this->square;
+        return $this->coordinates;
     }
 
     public function getPiece(): ?PieceEnum

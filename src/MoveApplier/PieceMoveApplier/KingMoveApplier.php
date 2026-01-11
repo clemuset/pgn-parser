@@ -3,13 +3,13 @@
 namespace Cmuset\PgnParser\MoveApplier\PieceMoveApplier;
 
 use Cmuset\PgnParser\Enum\CastlingEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
-use Cmuset\PgnParser\Enum\Violation\MoveViolationEnum;
 use Cmuset\PgnParser\Exception\MoveApplyingException;
 use Cmuset\PgnParser\Model\Move;
 use Cmuset\PgnParser\Model\Position;
 use Cmuset\PgnParser\MoveApplier\MoveHelper;
+use Cmuset\PgnParser\Validator\Enum\MoveViolationEnum;
 
 class KingMoveApplier extends AbstractPieceMoveApplier
 {
@@ -38,33 +38,33 @@ class KingMoveApplier extends AbstractPieceMoveApplier
 
         switch ($castling) {
             case CastlingEnum::WHITE_KINGSIDE:
-                $position->setPieceAt(SquareEnum::G1, PieceEnum::WHITE_KING);
-                $position->setPieceAt(SquareEnum::F1, PieceEnum::WHITE_ROOK);
-                $position->setPieceAt(SquareEnum::E1, null);
-                $position->setPieceAt(SquareEnum::H1, null);
+                $position->setPieceAt(CoordinatesEnum::G1, PieceEnum::WHITE_KING);
+                $position->setPieceAt(CoordinatesEnum::F1, PieceEnum::WHITE_ROOK);
+                $position->setPieceAt(CoordinatesEnum::E1, null);
+                $position->setPieceAt(CoordinatesEnum::H1, null);
                 break;
             case CastlingEnum::WHITE_QUEENSIDE:
-                $position->setPieceAt(SquareEnum::C1, PieceEnum::WHITE_KING);
-                $position->setPieceAt(SquareEnum::D1, PieceEnum::WHITE_ROOK);
-                $position->setPieceAt(SquareEnum::E1, null);
-                $position->setPieceAt(SquareEnum::A1, null);
+                $position->setPieceAt(CoordinatesEnum::C1, PieceEnum::WHITE_KING);
+                $position->setPieceAt(CoordinatesEnum::D1, PieceEnum::WHITE_ROOK);
+                $position->setPieceAt(CoordinatesEnum::E1, null);
+                $position->setPieceAt(CoordinatesEnum::A1, null);
                 break;
             case CastlingEnum::BLACK_KINGSIDE:
-                $position->setPieceAt(SquareEnum::G8, PieceEnum::BLACK_KING);
-                $position->setPieceAt(SquareEnum::F8, PieceEnum::BLACK_ROOK);
-                $position->setPieceAt(SquareEnum::E8, null);
-                $position->setPieceAt(SquareEnum::H8, null);
+                $position->setPieceAt(CoordinatesEnum::G8, PieceEnum::BLACK_KING);
+                $position->setPieceAt(CoordinatesEnum::F8, PieceEnum::BLACK_ROOK);
+                $position->setPieceAt(CoordinatesEnum::E8, null);
+                $position->setPieceAt(CoordinatesEnum::H8, null);
                 break;
             case CastlingEnum::BLACK_QUEENSIDE:
-                $position->setPieceAt(SquareEnum::C8, PieceEnum::BLACK_KING);
-                $position->setPieceAt(SquareEnum::D8, PieceEnum::BLACK_ROOK);
-                $position->setPieceAt(SquareEnum::E8, null);
-                $position->setPieceAt(SquareEnum::A8, null);
+                $position->setPieceAt(CoordinatesEnum::C8, PieceEnum::BLACK_KING);
+                $position->setPieceAt(CoordinatesEnum::D8, PieceEnum::BLACK_ROOK);
+                $position->setPieceAt(CoordinatesEnum::E8, null);
+                $position->setPieceAt(CoordinatesEnum::A8, null);
                 break;
         }
     }
 
-    public function isAttacking(SquareEnum $from, SquareEnum $to, Position $position): bool
+    public function isAttacking(CoordinatesEnum $from, CoordinatesEnum $to, Position $position): bool
     {
         return MoveHelper::isKingMove($from, $to);
     }

@@ -3,8 +3,8 @@
 namespace Cmuset\PgnParser\Tests\Exporter;
 
 use Cmuset\PgnParser\Enum\CastlingEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
 use Cmuset\PgnParser\Exporter\MoveExporter;
 use Cmuset\PgnParser\Model\Move;
 use PHPUnit\Framework\TestCase;
@@ -22,7 +22,7 @@ class MoveExporterTest extends TestCase
     {
         $move = new Move();
         $move->setPiece(PieceEnum::WHITE_PAWN);
-        $move->setTo(SquareEnum::E4);
+        $move->setTo(CoordinatesEnum::E4);
         self::assertSame('e4', $this->exporter->export($move));
     }
 
@@ -33,7 +33,7 @@ class MoveExporterTest extends TestCase
         $move->setFileFrom('c');
         $move->setRowFrom(4);
         $move->setIsCapture(true);
-        $move->setTo(SquareEnum::F7);
+        $move->setTo(CoordinatesEnum::F7);
         $move->setIsCheck(true);
         self::assertSame('Bc4xf7+', $this->exporter->export($move));
     }
@@ -44,7 +44,7 @@ class MoveExporterTest extends TestCase
         $move->setPiece(PieceEnum::WHITE_PAWN);
         $move->setFileFrom('e');
         $move->setIsCapture(true);
-        $move->setTo(SquareEnum::D8);
+        $move->setTo(CoordinatesEnum::D8);
         $move->setPromotion(PieceEnum::WHITE_QUEEN);
         $move->setIsCheckmate(true);
         self::assertSame('exd8=Q#', $this->exporter->export($move));
@@ -55,7 +55,7 @@ class MoveExporterTest extends TestCase
         $move = new Move();
         $move->setPiece(PieceEnum::WHITE_PAWN);
         $move->setIsCapture(true);
-        $move->setTo(SquareEnum::H8);
+        $move->setTo(CoordinatesEnum::H8);
         $move->setPromotion(PieceEnum::WHITE_QUEEN);
         $move->setIsCheckmate(true);
         self::assertSame('xh8=Q#', $this->exporter->export($move));

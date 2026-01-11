@@ -1,8 +1,8 @@
 <?php
 
-namespace Cmuset\PgnParser\Enum\Violation;
+namespace Cmuset\PgnParser\Validator\Enum;
 
-enum MoveViolationEnum: string implements ViolationEnumInterface
+enum MoveViolationEnum: string
 {
     case PIECE_NOT_FOUND = 'No piece found for the move';
     case MULTIPLE_PIECES_MATCH = 'Multiple pieces match the move piece';

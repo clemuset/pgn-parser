@@ -4,8 +4,8 @@ namespace Cmuset\PgnParser\Validator;
 
 use Cmuset\PgnParser\Enum\ColorEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\Violation\PositionViolationEnum;
 use Cmuset\PgnParser\Model\Position;
+use Cmuset\PgnParser\Validator\Enum\PositionViolationEnum;
 
 class PositionValidator
 {
@@ -53,7 +53,7 @@ class PositionValidator
         $blackPawns = $position->find(PieceEnum::BLACK_PAWN);
 
         foreach ([...$whitePawns, ...$blackPawns] as $pawnSquare) {
-            $rank = $pawnSquare->getSquare()->rank();
+            $rank = $pawnSquare->getCoordinates()->rank();
 
             if (1 === $rank || 8 === $rank) {
                 $violations[] = PositionViolationEnum::PAWN_ON_INVALID_RANK;

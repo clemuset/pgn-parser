@@ -132,7 +132,6 @@ class PGNParser implements PGNParserInterface
                     $san = $token['value'];
                     $currentNode = new MoveNode();
                     $currentNode->setMove($this->sanParser->parse($san, $color));
-                    $currentNode->setColor($color);
                     $currentNode->setMoveNumber($moveNumber);
 
                     if (null !== $pendingPreComment) {

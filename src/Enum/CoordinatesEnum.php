@@ -2,7 +2,7 @@
 
 namespace Cmuset\PgnParser\Enum;
 
-enum SquareEnum: string
+enum CoordinatesEnum: string
 {
     case A1 = 'a1';
     case A2 = 'a2';
@@ -93,5 +93,49 @@ enum SquareEnum: string
             self::A3, self::B3, self::C3, self::D3, self::E3, self::F3, self::G3, self::H3,
             self::A6, self::B6, self::C6, self::D6, self::E6, self::F6, self::G6, self::H6,
         ];
+    }
+
+    public function up(): ?self
+    {
+        $newRank = $this->rank() + 1;
+
+        if ($newRank > 8) {
+            return null;
+        }
+
+        return self::tryFrom($this->file() . $newRank);
+    }
+
+    public function down(): ?self
+    {
+        $newRank = $this->rank() - 1;
+
+        if ($newRank < 1) {
+            return null;
+        }
+
+        return self::tryFrom($this->file() . $newRank);
+    }
+
+    public function left(): ?self
+    {
+        $newFile = chr(ord($this->file()) - 1);
+
+        if ($newFile < 'a') {
+            return null;
+        }
+
+        return self::tryFrom($newFile . $this->rank());
+    }
+
+    public function right(): ?self
+    {
+        $newFile = chr(ord($this->file()) + 1);
+
+        if ($newFile > 'h') {
+            return null;
+        }
+
+        return self::tryFrom($newFile . $this->rank());
     }
 }

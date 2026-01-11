@@ -1,8 +1,8 @@
 <?php
 
-namespace Cmuset\PgnParser\Enum\Violation;
+namespace Cmuset\PgnParser\Validator\Enum;
 
-enum PositionViolationEnum: string implements ViolationEnumInterface
+enum PositionViolationEnum: string
 {
     case KING_IN_CHECK = 'King in check';
     case NO_WHITE_KING = 'No white king present';

@@ -2,12 +2,12 @@
 
 namespace Cmuset\PgnParser\Validator;
 
-use Cmuset\PgnParser\Enum\Violation\ViolationEnumInterface;
 use Cmuset\PgnParser\Exception\MoveApplyingException;
 use Cmuset\PgnParser\Model\Game;
 use Cmuset\PgnParser\Model\MoveNode;
 use Cmuset\PgnParser\Model\Position;
 use Cmuset\PgnParser\MoveApplier\MoveApplier;
+use Cmuset\PgnParser\Validator\Model\GameViolation;
 
 class GameValidator
 {
@@ -18,38 +18,38 @@ class GameValidator
         $this->moveApplier = new MoveApplier();
     }
 
-    /**
-     * @return ViolationEnumInterface[]
-     */
-    public function validate(Game $game): array
+    public function validate(Game $game): ?GameViolation
     {
         return $this->validateLine($game->getInitialPosition(), $game->getMainLine());
     }
 
     /**
      * @param MoveNode[] $line
-     *
-     * @return ViolationEnumInterface[]
      */
-    private function validateLine(Position $position, array $line): array
+    private function validateLine(Position $position, array $line, string $movePathPrefix = ''): ?GameViolation
     {
         $currentPosition = clone $position;
         foreach ($line as $node) {
-            foreach ($node->getVariations() as $variation) {
-                $violations = $this->validateLine($currentPosition, $variation);
+            $movePath = $movePathPrefix . $node->getKey();
+            foreach ($node->getVariations() as $variationKey => $variation) {
+                $violation = $this->validateLine($currentPosition, $variation, $movePath . '[' . $variationKey . ']');
 
-                if (count($violations) > 0) {
-                    return $violations;
+                if (null !== $violation) {
+                    return $violation;
                 }
             }
 
             try {
                 $currentPosition = $this->moveApplier->apply($currentPosition, $node->getMove());
             } catch (MoveApplyingException $e) {
-                return [$e->getMoveViolation(), ...$e->getPositionViolations()];
+                return new GameViolation(
+                    $movePath,
+                    $e->getMoveViolation(),
+                    $e->getPositionViolations()
+                );
             }
         }
 
-        return [];
+        return null;
     }
 }

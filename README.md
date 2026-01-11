@@ -110,13 +110,9 @@ $game->setTag('Result', '1-0');
 $game->setResult(ResultEnum::WHITE_WIN);
 
 $node1 = new MoveNode();
-$node1->setMoveNumber(1);
-$node1->setColor(ColorEnum::WHITE);
 $node1->setMove(Move::fromSAN('e4', ColorEnum::WHITE));
 
 $node2 = new MoveNode();
-$node2->setMoveNumber(1);
-$node2->setColor(ColorEnum::BLACK);
 $node2->setMove(Move::fromSAN('e5', ColorEnum::BLACK));
 
 $game->addMoveNodes($node1, $node2);
@@ -172,14 +168,14 @@ use Cmuset\PgnParser\Model\Position;
 $position = Position::fromFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
 
 // Read a square
-use Cmuset\PgnParser\Enum\SquareEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
 
-$piece = $position->getPieceAt(SquareEnum::e2()); // e.g. white pawn enum instance
+$piece = $position->getPieceAt(CoordinatesEnum::E2); // e.g. white pawn enum instance
 
 // Modify then export
-$position->setPieceAt(SquareEnum::e4(), PieceEnum::from('P')); // places a white pawn on e4 (illustrative)
-$position->setPieceAt(SquareEnum::e2(), null); // removes piece from e2
+$position->setPieceAt(CoordinatesEnum::E4, PieceEnum::WHITE_PAWN); // places a white pawn on e4 (illustrative)
+$position->setPieceAt(CoordinatesEnum::E2, null); // removes piece from e2
 echo $position->getFEN(); // e.g. "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1"
 ```
 
@@ -220,9 +216,9 @@ use Cmuset\PgnParser\Model\Game;
 $posViolations = (new PositionValidator())->validate($pos); // PositionViolationEnum[]
 
 $game = Game::fromPGN($somePgn);
-$violations = (new GameValidator())->validate($game); // ViolationEnumInterface[] (may contain MoveViolationEnum and/or PositionViolationEnum)
+$violation = (new GameValidator())->validate($game); // GameViolation object
 
-if (empty($violations)) {
+if ($violation === null) {
     // The game main line and its variations are valid
 }
 ```
@@ -247,7 +243,7 @@ Parsers (`PGNParser`, `SANParser`, `FENParser`) transform strings into structure
 
 - `ColorEnum`: WHITE / BLACK
 - `PieceEnum`: Typed by color & piece
-- `SquareEnum`: All 64 squares (`a1` .. `h8`)
+- `CoordinatesEnum`: All 64 squares (`a1` .. `h8`)
 - `CastlingEnum`: Encodes side + direction
 - `ResultEnum`: `1-0`, `0-1`, `1/2-1/2`, `*`
 - `MoveViolationEnum`: Move-level violations (e.g., wrong color to move, no piece to capture, not-a-check, castling not allowed, etc.)

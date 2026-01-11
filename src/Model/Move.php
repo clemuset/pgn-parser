@@ -4,18 +4,18 @@ namespace Cmuset\PgnParser\Model;
 
 use Cmuset\PgnParser\Enum\CastlingEnum;
 use Cmuset\PgnParser\Enum\ColorEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
 use Cmuset\PgnParser\Exporter\MoveExporter;
 use Cmuset\PgnParser\Parser\SANParser;
 
 class Move
 {
     private ?PieceEnum $piece = null;
-    private ?SquareEnum $squareFrom = null;
+    private ?CoordinatesEnum $squareFrom = null;
     private ?string $fileFrom = null;
     private ?int $rowFrom = null;
-    private ?SquareEnum $to = null;
+    private ?CoordinatesEnum $to = null;
     private ?PieceEnum $promotion = null;
     private bool $isCapture = false;
     private bool $isCheck = false;
@@ -43,12 +43,12 @@ class Move
         $this->piece = $piece;
     }
 
-    public function getSquareFrom(): ?SquareEnum
+    public function getSquareFrom(): ?CoordinatesEnum
     {
         return $this->squareFrom;
     }
 
-    public function setSquareFrom(?SquareEnum $squareFrom): void
+    public function setSquareFrom(?CoordinatesEnum $squareFrom): void
     {
         $this->squareFrom = $squareFrom;
     }
@@ -73,12 +73,12 @@ class Move
         $this->rowFrom = $rowFrom;
     }
 
-    public function getTo(): ?SquareEnum
+    public function getTo(): ?CoordinatesEnum
     {
         return $this->to;
     }
 
-    public function setTo(?SquareEnum $to): void
+    public function setTo(?CoordinatesEnum $to): void
     {
         $this->to = $to;
     }

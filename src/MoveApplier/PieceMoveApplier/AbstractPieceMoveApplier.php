@@ -2,12 +2,12 @@
 
 namespace Cmuset\PgnParser\MoveApplier\PieceMoveApplier;
 
-use Cmuset\PgnParser\Enum\SquareEnum;
-use Cmuset\PgnParser\Enum\Violation\MoveViolationEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Exception\MoveApplyingException;
 use Cmuset\PgnParser\Model\Move;
 use Cmuset\PgnParser\Model\Position;
 use Cmuset\PgnParser\Model\Square;
+use Cmuset\PgnParser\Validator\Enum\MoveViolationEnum;
 
 abstract class AbstractPieceMoveApplier
 {
@@ -35,19 +35,19 @@ abstract class AbstractPieceMoveApplier
 
         if ($move->getPiece()->isPawn() && 2 === abs($fromSquare->rank() - $move->getTo()->rank())) {
             $enPassantRank = ($fromSquare->rank() + $move->getTo()->rank()) / 2;
-            $position->setEnPassantTarget(SquareEnum::tryFrom($fromSquare->file() . $enPassantRank));
+            $position->setEnPassantTarget(CoordinatesEnum::tryFrom($fromSquare->file() . $enPassantRank));
         } else {
             $position->setEnPassantTarget(null);
         }
     }
 
-    public function canMove(SquareEnum $from, SquareEnum $to, Position $position): bool
+    public function canMove(CoordinatesEnum $from, CoordinatesEnum $to, Position $position): bool
     {
         // For non-pawn pieces, movement and attacking squares are the same
         return $this->isAttacking($from, $to, $position);
     }
 
-    abstract public function isAttacking(SquareEnum $from, SquareEnum $to, Position $position): bool;
+    abstract public function isAttacking(CoordinatesEnum $from, CoordinatesEnum $to, Position $position): bool;
 
     private function findSquaresWherePieceIs(Position $position, Move $move): array
     {
@@ -59,20 +59,20 @@ abstract class AbstractPieceMoveApplier
 
         if (null !== $move->getFileFrom()) {
             return array_map(
-                fn (Square $square) => $square->getSquare(),
+                fn (Square $square) => $square->getCoordinates(),
                 $position->findByFile($pieceToMove, $move->getFileFrom())
             );
         }
 
         if (null !== $move->getRankFrom()) {
             return array_map(
-                fn (Square $square) => $square->getSquare(),
+                fn (Square $square) => $square->getCoordinates(),
                 $position->findByRank($pieceToMove, $move->getRankFrom())
             );
         }
 
         return array_map(
-            fn (Square $square) => $square->getSquare(),
+            fn (Square $square) => $square->getCoordinates(),
             $position->find($pieceToMove)
         );
     }

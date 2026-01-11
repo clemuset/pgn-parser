@@ -2,9 +2,8 @@
 
 namespace Cmuset\PgnParser\Tests\Exporter;
 
-use Cmuset\PgnParser\Enum\ColorEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
 use Cmuset\PgnParser\Exporter\GameExporter;
 use Cmuset\PgnParser\Model\Game;
 use Cmuset\PgnParser\Model\Move;
@@ -33,9 +32,8 @@ class GameExporterTest extends TestCase
         $n1 = new MoveNode();
         $m1 = new Move();
         $m1->setPiece(PieceEnum::WHITE_PAWN);
-        $m1->setTo(SquareEnum::E4);
+        $m1->setTo(CoordinatesEnum::E4);
         $n1->setMove($m1);
-        $n1->setColor(ColorEnum::WHITE);
         $n1->setMoveNumber(1);
         $game->addMoveNode($n1);
 
@@ -43,9 +41,8 @@ class GameExporterTest extends TestCase
         $n2 = new MoveNode();
         $m2 = new Move();
         $m2->setPiece(PieceEnum::BLACK_PAWN);
-        $m2->setTo(SquareEnum::E5);
+        $m2->setTo(CoordinatesEnum::E5);
         $n2->setMove($m2);
-        $n2->setColor(ColorEnum::BLACK);
         $n2->setMoveNumber(1);
         $game->addMoveNode($n2);
 
@@ -53,9 +50,8 @@ class GameExporterTest extends TestCase
         $n3 = new MoveNode();
         $m3 = new Move();
         $m3->setPiece(PieceEnum::WHITE_KNIGHT);
-        $m3->setTo(SquareEnum::F3);
+        $m3->setTo(CoordinatesEnum::F3);
         $n3->setMove($m3);
-        $n3->setColor(ColorEnum::WHITE);
         $n3->setMoveNumber(2);
         $game->addMoveNode($n3);
 
@@ -75,9 +71,8 @@ class GameExporterTest extends TestCase
         $n1 = new MoveNode();
         $m1 = new Move();
         $m1->setPiece(PieceEnum::WHITE_PAWN);
-        $m1->setTo(SquareEnum::E4);
+        $m1->setTo(CoordinatesEnum::E4);
         $n1->setMove($m1);
-        $n1->setColor(ColorEnum::WHITE);
         $n1->setMoveNumber(1);
         $game->addMoveNode($n1);
 
@@ -85,9 +80,8 @@ class GameExporterTest extends TestCase
         $n2 = new MoveNode();
         $m2 = new Move();
         $m2->setPiece(PieceEnum::BLACK_PAWN);
-        $m2->setTo(SquareEnum::E5);
+        $m2->setTo(CoordinatesEnum::E5);
         $n2->setMove($m2);
-        $n2->setColor(ColorEnum::BLACK);
         $n2->setMoveNumber(1);
         $game->addMoveNode($n2);
 
@@ -95,9 +89,8 @@ class GameExporterTest extends TestCase
         $varMoveNode = new MoveNode();
         $varMove = new Move();
         $varMove->setPiece(PieceEnum::BLACK_PAWN);
-        $varMove->setTo(SquareEnum::C5);
+        $varMove->setTo(CoordinatesEnum::C5);
         $varMoveNode->setMove($varMove);
-        $varMoveNode->setColor(ColorEnum::BLACK);
         $varMoveNode->setMoveNumber(1);
         $n2->addVariation([$varMoveNode]);
 

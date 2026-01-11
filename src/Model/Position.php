@@ -4,8 +4,8 @@ namespace Cmuset\PgnParser\Model;
 
 use Cmuset\PgnParser\Enum\CastlingEnum;
 use Cmuset\PgnParser\Enum\ColorEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
 use Cmuset\PgnParser\Exporter\PositionExporter;
 use Cmuset\PgnParser\MoveApplier\MoveApplier;
 use Cmuset\PgnParser\MoveApplier\PieceMoveApplier\BishopMoveApplier;
@@ -29,7 +29,7 @@ class Position
         CastlingEnum::BLACK_KINGSIDE,
         CastlingEnum::BLACK_QUEENSIDE,
     ];
-    private ?SquareEnum $enPassantTarget = null;
+    private ?CoordinatesEnum $enPassantTarget = null;
     private int $halfmoveClock = 0;
     private int $fullmoveNumber = 1;
 
@@ -50,8 +50,8 @@ class Position
 
     private function initSquares(): void
     {
-        foreach (SquareEnum::cases() as $squareEnum) {
-            $this->squares[$squareEnum->value] = new Square($squareEnum);
+        foreach (CoordinatesEnum::cases() as $coordinates) {
+            $this->squares[$coordinates->value] = new Square($coordinates);
         }
     }
 
@@ -60,9 +60,9 @@ class Position
         return $this->squares;
     }
 
-    public function getSquare(SquareEnum $squareEnum): Square
+    public function getSquare(CoordinatesEnum $coordinates): Square
     {
-        return $this->squares[$squareEnum->value];
+        return $this->squares[$coordinates->value];
     }
 
     public function getSideToMove(): ColorEnum
@@ -103,12 +103,12 @@ class Position
         return in_array($castling, $this->castlingRights);
     }
 
-    public function getEnPassantTarget(): ?SquareEnum
+    public function getEnPassantTarget(): ?CoordinatesEnum
     {
         return $this->enPassantTarget;
     }
 
-    public function setEnPassantTarget(?SquareEnum $enPassantTarget): void
+    public function setEnPassantTarget(?CoordinatesEnum $enPassantTarget): void
     {
         $this->enPassantTarget = $enPassantTarget;
     }
@@ -133,7 +133,7 @@ class Position
         $this->fullmoveNumber = $fullmoveNumber;
     }
 
-    public function setPieceAt(SquareEnum $square, ?PieceEnum $piece): void
+    public function setPieceAt(CoordinatesEnum $square, ?PieceEnum $piece): void
     {
         if (!isset($this->squares[$square->value])) {
             throw new \LogicException('Square not initialized: ' . $square->value);
@@ -142,7 +142,7 @@ class Position
         $this->squares[$square->value]->setPiece($piece);
     }
 
-    public function getPieceAt(SquareEnum $square): ?PieceEnum
+    public function getPieceAt(CoordinatesEnum $square): ?PieceEnum
     {
         if (!isset($this->squares[$square->value])) {
             throw new \LogicException('Square not initialized: ' . $square->value);
@@ -171,7 +171,7 @@ class Position
     {
         return array_filter(
             $this->find($piece),
-            fn (Square $square) => $square->getSquare()->file() === $file,
+            fn (Square $square) => $square->getCoordinates()->file() === $file,
         );
     }
 
@@ -179,7 +179,7 @@ class Position
     {
         return array_filter(
             $this->find($piece),
-            fn (Square $square) => $square->getSquare()->rank() === $rank,
+            fn (Square $square) => $square->getCoordinates()->rank() === $rank,
         );
     }
 
@@ -191,7 +191,7 @@ class Position
     /**
      * @return Square[]
      */
-    public function findAttackers(Square|SquareEnum $square, ColorEnum $attackerColor): array
+    public function findAttackers(Square|CoordinatesEnum $square, ColorEnum $attackerColor): array
     {
         $square = $square instanceof Square ? $square : $this->getSquare($square);
 
@@ -203,7 +203,7 @@ class Position
                 continue;
             }
 
-            if ($this->isAttacking($piece, $from->getSquare(), $square->getSquare())) {
+            if ($this->isAttacking($piece, $from->getCoordinates(), $square->getCoordinates())) {
                 $attackers[] = $from;
             }
         }
@@ -211,7 +211,7 @@ class Position
         return $attackers;
     }
 
-    public function hasAttacker(Square|SquareEnum $square, ColorEnum $attackerColor): bool
+    public function hasAttacker(Square|CoordinatesEnum $square, ColorEnum $attackerColor): bool
     {
         return count($this->findAttackers($square, $attackerColor)) > 0;
     }
@@ -233,11 +233,11 @@ class Position
             $piece = $fromSquare->getPiece();
             $move = new Move();
             $move->setPiece($piece);
-            $move->setSquareFrom($fromSquare->getSquare());
+            $move->setSquareFrom($fromSquare->getCoordinates());
 
-            foreach (SquareEnum::cases() as $toSquareEnum) {
+            foreach (CoordinatesEnum::cases() as $coordinates) {
                 $cloneMove = clone $move;
-                $cloneMove->setTo($toSquareEnum);
+                $cloneMove->setTo($coordinates);
 
                 try {
                     $this->applyMove($cloneMove);
@@ -267,7 +267,7 @@ class Position
         return $legalMoves;
     }
 
-    private function isAttacking(PieceEnum $piece, SquareEnum $from, SquareEnum $to): bool
+    private function isAttacking(PieceEnum $piece, CoordinatesEnum $from, CoordinatesEnum $to): bool
     {
         if ($from === $to) {
             return false;
@@ -285,6 +285,9 @@ class Position
         return $pieceMoveApplier->isAttacking($from, $to, $this);
     }
 
+    /**
+     * @return iterable<Square>
+     */
     public function iterateSquaresWithPiece(?ColorEnum $color = null): iterable
     {
         foreach ($this->squares as $square) {
@@ -341,8 +344,8 @@ class Position
         $output = '';
         for ($rank = 8; $rank >= 1; --$rank) {
             for ($file = 'a'; $file <= 'h'; ++$file) {
-                $squareEnum = SquareEnum::from($file . $rank);
-                $piece = $this->getPieceAt($squareEnum);
+                $coordinates = CoordinatesEnum::from($file . $rank);
+                $piece = $this->getPieceAt($coordinates);
                 $output .= $piece ? $piece->value : '.';
                 $output .= ' ';
             }

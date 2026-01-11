@@ -4,8 +4,8 @@ namespace Cmuset\PgnParser\Tests\MoveApplier;
 
 use Cmuset\PgnParser\Enum\CastlingEnum;
 use Cmuset\PgnParser\Enum\ColorEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
 use Cmuset\PgnParser\Exception\MoveApplyingException;
 use Cmuset\PgnParser\Model\Move;
 use Cmuset\PgnParser\Model\Position;
@@ -29,8 +29,8 @@ class MoveApplierTest extends TestCase
 
         $newPosition = $this->applier->apply($position, $move);
 
-        self::assertSame(PieceEnum::WHITE_PAWN, $newPosition->getPieceAt(SquareEnum::E4));
-        self::assertNull($newPosition->getPieceAt(SquareEnum::E2));
+        self::assertSame(PieceEnum::WHITE_PAWN, $newPosition->getPieceAt(CoordinatesEnum::E4));
+        self::assertNull($newPosition->getPieceAt(CoordinatesEnum::E2));
         self::assertSame(ColorEnum::BLACK, $newPosition->getSideToMove());
     }
 
@@ -162,11 +162,11 @@ class MoveApplierTest extends TestCase
         $position = Position::fromFEN(PGNParser::INITIAL_FEN);
         $move = Move::fromSAN('e4', ColorEnum::WHITE);
         $newPosition = $this->applier->apply($position, $move);
-        self::assertSame(SquareEnum::E3, $newPosition->getEnPassantTarget());
+        self::assertSame(CoordinatesEnum::E3, $newPosition->getEnPassantTarget());
 
         $move = Move::fromSAN('d5', ColorEnum::BLACK);
         $newPosition = $this->applier->apply($newPosition, $move);
-        self::assertSame(SquareEnum::D6, $newPosition->getEnPassantTarget());
+        self::assertSame(CoordinatesEnum::D6, $newPosition->getEnPassantTarget());
 
         $move = Move::fromSAN('Nf3', ColorEnum::WHITE);
         $newPosition = $this->applier->apply($newPosition, $move);
@@ -178,9 +178,9 @@ class MoveApplierTest extends TestCase
         $position = Position::fromFEN('r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1');
         $move = Move::fromSAN('O-O', ColorEnum::WHITE);
         $newPosition = $this->applier->apply($position, $move);
-        self::assertSame(PieceEnum::WHITE_KING, $newPosition->getPieceAt(SquareEnum::G1));
-        self::assertSame(PieceEnum::WHITE_ROOK, $newPosition->getPieceAt(SquareEnum::F1));
-        self::assertNull($newPosition->getPieceAt(SquareEnum::E1));
-        self::assertNull($newPosition->getPieceAt(SquareEnum::H1));
+        self::assertSame(PieceEnum::WHITE_KING, $newPosition->getPieceAt(CoordinatesEnum::G1));
+        self::assertSame(PieceEnum::WHITE_ROOK, $newPosition->getPieceAt(CoordinatesEnum::F1));
+        self::assertNull($newPosition->getPieceAt(CoordinatesEnum::E1));
+        self::assertNull($newPosition->getPieceAt(CoordinatesEnum::H1));
     }
 }

@@ -3,11 +3,11 @@
 namespace Cmuset\PgnParser\Tests\Validator;
 
 use Cmuset\PgnParser\Enum\ColorEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
-use Cmuset\PgnParser\Enum\Violation\PositionViolationEnum;
 use Cmuset\PgnParser\Model\Position;
 use Cmuset\PgnParser\Parser\PGNParser;
+use Cmuset\PgnParser\Validator\Enum\PositionViolationEnum;
 use Cmuset\PgnParser\Validator\PositionValidator;
 use PHPUnit\Framework\TestCase;
 
@@ -24,9 +24,9 @@ class PositionValidatorTest extends TestCase
     {
         $p = new Position();
         // Place white rook on e1 and black king on e8, white to move.
-        $p->setPieceAt(SquareEnum::E1, PieceEnum::WHITE_ROOK);
-        $p->setPieceAt(SquareEnum::D1, PieceEnum::WHITE_KING);
-        $p->setPieceAt(SquareEnum::E8, PieceEnum::BLACK_KING);
+        $p->setPieceAt(CoordinatesEnum::E1, PieceEnum::WHITE_ROOK);
+        $p->setPieceAt(CoordinatesEnum::D1, PieceEnum::WHITE_KING);
+        $p->setPieceAt(CoordinatesEnum::E8, PieceEnum::BLACK_KING);
         $p->setSideToMove(ColorEnum::WHITE);
 
         self::assertTrue($this->positionHasViolation($p, PositionViolationEnum::KING_IN_CHECK));
@@ -35,10 +35,10 @@ class PositionValidatorTest extends TestCase
     public function testRookBlocked(): void
     {
         $p = new Position();
-        $p->setPieceAt(SquareEnum::E1, PieceEnum::WHITE_ROOK);
-        $p->setPieceAt(SquareEnum::E2, PieceEnum::WHITE_PAWN); // Block the rook
-        $p->setPieceAt(SquareEnum::D1, PieceEnum::WHITE_KING);
-        $p->setPieceAt(SquareEnum::E8, PieceEnum::BLACK_KING);
+        $p->setPieceAt(CoordinatesEnum::E1, PieceEnum::WHITE_ROOK);
+        $p->setPieceAt(CoordinatesEnum::E2, PieceEnum::WHITE_PAWN); // Block the rook
+        $p->setPieceAt(CoordinatesEnum::D1, PieceEnum::WHITE_KING);
+        $p->setPieceAt(CoordinatesEnum::E8, PieceEnum::BLACK_KING);
         $p->setSideToMove(ColorEnum::WHITE);
 
         self::assertFalse($this->positionHasViolation($p, PositionViolationEnum::KING_IN_CHECK));
@@ -47,9 +47,9 @@ class PositionValidatorTest extends TestCase
     public function testKnightCheck(): void
     {
         $p = new Position();
-        $p->setPieceAt(SquareEnum::F6, PieceEnum::WHITE_KNIGHT);
-        $p->setPieceAt(SquareEnum::D1, PieceEnum::WHITE_KING);
-        $p->setPieceAt(SquareEnum::E8, PieceEnum::BLACK_KING);
+        $p->setPieceAt(CoordinatesEnum::F6, PieceEnum::WHITE_KNIGHT);
+        $p->setPieceAt(CoordinatesEnum::D1, PieceEnum::WHITE_KING);
+        $p->setPieceAt(CoordinatesEnum::E8, PieceEnum::BLACK_KING);
         $p->setSideToMove(ColorEnum::WHITE);
 
         self::assertTrue($this->positionHasViolation($p, PositionViolationEnum::KING_IN_CHECK));
@@ -58,9 +58,9 @@ class PositionValidatorTest extends TestCase
     public function testPawnCheck(): void
     {
         $p = new Position();
-        $p->setPieceAt(SquareEnum::D4, PieceEnum::WHITE_PAWN);
-        $p->setPieceAt(SquareEnum::D1, PieceEnum::WHITE_KING);
-        $p->setPieceAt(SquareEnum::E5, PieceEnum::BLACK_KING);
+        $p->setPieceAt(CoordinatesEnum::D4, PieceEnum::WHITE_PAWN);
+        $p->setPieceAt(CoordinatesEnum::D1, PieceEnum::WHITE_KING);
+        $p->setPieceAt(CoordinatesEnum::E5, PieceEnum::BLACK_KING);
         $p->setSideToMove(ColorEnum::WHITE);
 
         self::assertTrue($this->positionHasViolation($p, PositionViolationEnum::KING_IN_CHECK));
@@ -69,8 +69,8 @@ class PositionValidatorTest extends TestCase
     public function testKingCheck(): void
     {
         $p = new Position();
-        $p->setPieceAt(SquareEnum::E2, PieceEnum::WHITE_KING);
-        $p->setPieceAt(SquareEnum::E3, PieceEnum::BLACK_KING);
+        $p->setPieceAt(CoordinatesEnum::E2, PieceEnum::WHITE_KING);
+        $p->setPieceAt(CoordinatesEnum::E3, PieceEnum::BLACK_KING);
         $p->setSideToMove(ColorEnum::WHITE);
 
         self::assertTrue($this->positionHasViolation($p, PositionViolationEnum::KING_IN_CHECK));
@@ -79,9 +79,9 @@ class PositionValidatorTest extends TestCase
     public function testCheckAgainstWhiteKingWhenBlackToMove(): void
     {
         $p = new Position();
-        $p->setPieceAt(SquareEnum::E1, PieceEnum::WHITE_KING);
-        $p->setPieceAt(SquareEnum::E8, PieceEnum::BLACK_QUEEN);
-        $p->setPieceAt(SquareEnum::D8, PieceEnum::BLACK_KING);
+        $p->setPieceAt(CoordinatesEnum::E1, PieceEnum::WHITE_KING);
+        $p->setPieceAt(CoordinatesEnum::E8, PieceEnum::BLACK_QUEEN);
+        $p->setPieceAt(CoordinatesEnum::D8, PieceEnum::BLACK_KING);
         $p->setSideToMove(ColorEnum::BLACK);
 
         self::assertTrue($this->positionHasViolation($p, PositionViolationEnum::KING_IN_CHECK));
@@ -90,7 +90,7 @@ class PositionValidatorTest extends TestCase
     public function testNoWhiteKing(): void
     {
         $p = new Position();
-        $p->setPieceAt(SquareEnum::E8, PieceEnum::BLACK_KING);
+        $p->setPieceAt(CoordinatesEnum::E8, PieceEnum::BLACK_KING);
         $p->setSideToMove(ColorEnum::WHITE);
 
         self::assertTrue($this->positionHasViolation($p, PositionViolationEnum::NO_WHITE_KING));
@@ -99,7 +99,7 @@ class PositionValidatorTest extends TestCase
     public function testNoBlackKing(): void
     {
         $p = new Position();
-        $p->setPieceAt(SquareEnum::E1, PieceEnum::WHITE_KING);
+        $p->setPieceAt(CoordinatesEnum::E1, PieceEnum::WHITE_KING);
         $p->setSideToMove(ColorEnum::WHITE);
 
         self::assertTrue($this->positionHasViolation($p, PositionViolationEnum::NO_BLACK_KING));
@@ -108,9 +108,9 @@ class PositionValidatorTest extends TestCase
     public function testMultipleWhiteKings(): void
     {
         $p = new Position();
-        $p->setPieceAt(SquareEnum::E1, PieceEnum::WHITE_KING);
-        $p->setPieceAt(SquareEnum::E2, PieceEnum::WHITE_KING);
-        $p->setPieceAt(SquareEnum::E8, PieceEnum::BLACK_KING);
+        $p->setPieceAt(CoordinatesEnum::E1, PieceEnum::WHITE_KING);
+        $p->setPieceAt(CoordinatesEnum::E2, PieceEnum::WHITE_KING);
+        $p->setPieceAt(CoordinatesEnum::E8, PieceEnum::BLACK_KING);
         $p->setSideToMove(ColorEnum::WHITE);
 
         self::assertTrue($this->positionHasViolation($p, PositionViolationEnum::MULTIPLE_WHITE_KINGS));
@@ -119,9 +119,9 @@ class PositionValidatorTest extends TestCase
     public function testMultipleBlackKings(): void
     {
         $p = new Position();
-        $p->setPieceAt(SquareEnum::E1, PieceEnum::WHITE_KING);
-        $p->setPieceAt(SquareEnum::E8, PieceEnum::BLACK_KING);
-        $p->setPieceAt(SquareEnum::E7, PieceEnum::BLACK_KING);
+        $p->setPieceAt(CoordinatesEnum::E1, PieceEnum::WHITE_KING);
+        $p->setPieceAt(CoordinatesEnum::E8, PieceEnum::BLACK_KING);
+        $p->setPieceAt(CoordinatesEnum::E7, PieceEnum::BLACK_KING);
         $p->setSideToMove(ColorEnum::WHITE);
 
         self::assertTrue($this->positionHasViolation($p, PositionViolationEnum::MULTIPLE_BLACK_KINGS));
@@ -133,8 +133,8 @@ class PositionValidatorTest extends TestCase
         self::assertEmpty($this->validator->validate($p));
 
         $p = Position::fromFEN('8/8/8/8/8/8/8/8 w - - 0 1');
-        $p->setPieceAt(SquareEnum::E1, PieceEnum::WHITE_KING);
-        $p->setPieceAt(SquareEnum::E8, PieceEnum::BLACK_KING);
+        $p->setPieceAt(CoordinatesEnum::E1, PieceEnum::WHITE_KING);
+        $p->setPieceAt(CoordinatesEnum::E8, PieceEnum::BLACK_KING);
         self::assertEmpty($this->validator->validate($p));
     }
 

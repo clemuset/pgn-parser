@@ -3,6 +3,7 @@
 namespace Cmuset\PgnParser\Tests\Model;
 
 use Cmuset\PgnParser\Enum\ColorEnum;
+use Cmuset\PgnParser\Enum\PieceEnum;
 use Cmuset\PgnParser\Model\Move;
 use Cmuset\PgnParser\Model\MoveNode;
 use PHPUnit\Framework\TestCase;
@@ -34,9 +35,9 @@ class MoveNodeTest extends TestCase
     {
         $node = new MoveNode();
         $move = new Move();
+        $move->setPiece(PieceEnum::BLACK_PAWN);
         $node->setMove($move);
         $node->setMoveNumber(5);
-        $node->setColor(ColorEnum::BLACK);
 
         self::assertSame($move, $node->getMove());
         self::assertSame(5, $node->getMoveNumber());

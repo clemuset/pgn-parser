@@ -3,8 +3,8 @@
 namespace Cmuset\PgnParser\Tests\Model;
 
 use Cmuset\PgnParser\Enum\ColorEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
 use Cmuset\PgnParser\Model\Move;
 use Cmuset\PgnParser\Model\Position;
 use Cmuset\PgnParser\Parser\PGNParser;
@@ -25,10 +25,10 @@ class PositionTest extends TestCase
     public function testSetAndGetPieceAt(): void
     {
         $position = new Position();
-        $position->setPieceAt(SquareEnum::E4, PieceEnum::WHITE_KNIGHT);
-        self::assertSame(PieceEnum::WHITE_KNIGHT, $position->getPieceAt(SquareEnum::E4));
-        $position->setPieceAt(SquareEnum::E4, null);
-        self::assertNull($position->getPieceAt(SquareEnum::E4));
+        $position->setPieceAt(CoordinatesEnum::E4, PieceEnum::WHITE_KNIGHT);
+        self::assertSame(PieceEnum::WHITE_KNIGHT, $position->getPieceAt(CoordinatesEnum::E4));
+        $position->setPieceAt(CoordinatesEnum::E4, null);
+        self::assertNull($position->getPieceAt(CoordinatesEnum::E4));
     }
 
     public function testSideToMoveMutation(): void

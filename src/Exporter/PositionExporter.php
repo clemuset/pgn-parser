@@ -3,7 +3,7 @@
 namespace Cmuset\PgnParser\Exporter;
 
 use Cmuset\PgnParser\Enum\CastlingEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Model\Position;
 
 class PositionExporter implements PositionExporterInterface
@@ -15,8 +15,8 @@ class PositionExporter implements PositionExporterInterface
             $row = '';
             $emptyCount = 0;
             for ($file = 'a'; $file <= 'h'; ++$file) {
-                $square = $file . $rank;
-                $piece = $position->getPieceAt(SquareEnum::from($square));
+                $coordinates = $file . $rank;
+                $piece = $position->getPieceAt(CoordinatesEnum::from($coordinates));
 
                 if (null === $piece) {
                     ++$emptyCount;

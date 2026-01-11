@@ -4,8 +4,8 @@ namespace Cmuset\PgnParser\Parser;
 
 use Cmuset\PgnParser\Enum\CastlingEnum;
 use Cmuset\PgnParser\Enum\ColorEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
 use Cmuset\PgnParser\Exception\FENParsingException;
 use Cmuset\PgnParser\Model\Position;
 
@@ -30,13 +30,13 @@ class FENParser implements FENParserInterface
         $position->setSideToMove(ColorEnum::from($this->extractSideToMove($fen)));
         $position->setCastlingRights($this->extractCastlingRights($fen));
 
-        $enPassantTarget = SquareEnum::tryFrom($this->extractEnPassantTarget($fen));
+        $enPassantTarget = CoordinatesEnum::tryFrom($this->extractEnPassantTarget($fen));
 
         if (null !== $enPassantTarget) {
-            if (!in_array($enPassantTarget, SquareEnum::allowedEnPassantTargets())) {
+            if (!in_array($enPassantTarget, CoordinatesEnum::allowedEnPassantTargets())) {
                 throw new FENParsingException('Invalid en passant target square in FEN string');
             }
-            $position->setEnPassantTarget(SquareEnum::tryFrom($this->extractEnPassantTarget($fen)));
+            $position->setEnPassantTarget(CoordinatesEnum::tryFrom($this->extractEnPassantTarget($fen)));
         }
 
         $position->setHalfmoveClock($this->extractHalfmoveClock($fen));
@@ -63,7 +63,7 @@ class FENParser implements FENParserInterface
                 if (is_numeric($char)) {
                     $file = chr(ord($file) + (int) $char);
                 } else {
-                    $pieces[] = [SquareEnum::from($file . $rank), PieceEnum::from($char)];
+                    $pieces[] = [CoordinatesEnum::from($file . $rank), PieceEnum::from($char)];
                     ++$file;
                 }
             }

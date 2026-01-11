@@ -2,8 +2,8 @@
 
 namespace Cmuset\PgnParser\Exception;
 
-use Cmuset\PgnParser\Enum\Violation\MoveViolationEnum;
-use Cmuset\PgnParser\Enum\Violation\PositionViolationEnum;
+use Cmuset\PgnParser\Validator\Enum\MoveViolationEnum;
+use Cmuset\PgnParser\Validator\Enum\PositionViolationEnum;
 
 class MoveApplyingException extends \Exception
 {

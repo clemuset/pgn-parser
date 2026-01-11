@@ -3,8 +3,8 @@
 namespace Cmuset\PgnParser\Tests\Model;
 
 use Cmuset\PgnParser\Enum\CastlingEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
 use Cmuset\PgnParser\Model\Move;
 use PHPUnit\Framework\TestCase;
 
@@ -26,8 +26,8 @@ class MoveTest extends TestCase
     {
         $move = new Move();
         $move->setPiece(PieceEnum::WHITE_BISHOP);
-        $move->setSquareFrom(SquareEnum::C1);
-        $move->setTo(SquareEnum::H6);
+        $move->setSquareFrom(CoordinatesEnum::C1);
+        $move->setTo(CoordinatesEnum::H6);
         $move->setPromotion(PieceEnum::WHITE_QUEEN);
         $move->setIsCapture(true);
         $move->setIsCheck(true);
@@ -36,8 +36,8 @@ class MoveTest extends TestCase
         $move->setAnnotation('!');
 
         self::assertSame(PieceEnum::WHITE_BISHOP, $move->getPiece());
-        self::assertSame(SquareEnum::C1, $move->getSquareFrom());
-        self::assertSame(SquareEnum::H6, $move->getTo());
+        self::assertSame(CoordinatesEnum::C1, $move->getSquareFrom());
+        self::assertSame(CoordinatesEnum::H6, $move->getTo());
         self::assertSame(PieceEnum::WHITE_QUEEN, $move->getPromotion());
         self::assertTrue($move->isCapture());
         self::assertTrue($move->isCheck());

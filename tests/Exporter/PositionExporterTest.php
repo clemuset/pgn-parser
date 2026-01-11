@@ -3,8 +3,8 @@
 namespace Cmuset\PgnParser\Tests\Exporter;
 
 use Cmuset\PgnParser\Enum\ColorEnum;
+use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Enum\SquareEnum;
 use Cmuset\PgnParser\Exporter\PositionExporter;
 use Cmuset\PgnParser\Model\Position;
 use Cmuset\PgnParser\Parser\FENParser;
@@ -40,13 +40,13 @@ class PositionExporterTest extends TestCase
     {
         $position = new Position();
 
-        $position->setPieceAt(SquareEnum::E4, PieceEnum::WHITE_KING);
-        $position->setPieceAt(SquareEnum::E6, PieceEnum::BLACK_KING);
-        $position->setPieceAt(SquareEnum::A2, PieceEnum::WHITE_PAWN);
-        $position->setPieceAt(SquareEnum::B7, PieceEnum::BLACK_PAWN);
+        $position->setPieceAt(CoordinatesEnum::E4, PieceEnum::WHITE_KING);
+        $position->setPieceAt(CoordinatesEnum::E6, PieceEnum::BLACK_KING);
+        $position->setPieceAt(CoordinatesEnum::A2, PieceEnum::WHITE_PAWN);
+        $position->setPieceAt(CoordinatesEnum::B7, PieceEnum::BLACK_PAWN);
         $position->setSideToMove(ColorEnum::BLACK);
         $position->setCastlingRights([]);
-        $position->setEnPassantTarget(SquareEnum::D6);
+        $position->setEnPassantTarget(CoordinatesEnum::D6);
         $position->setHalfmoveClock(7);
         $position->setFullmoveNumber(23);
 

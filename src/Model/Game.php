@@ -57,8 +57,26 @@ class Game
         $this->mainLine = $mainLine;
     }
 
+    public function getLastMoveNode(): ?MoveNode
+    {
+        if (empty($this->mainLine)) {
+            return null;
+        }
+
+        return end($this->mainLine);
+    }
+
     public function addMoveNode(MoveNode $moveNode): void
     {
+        if (null === $moveNode->getMoveNumber()) {
+            $lastMoveNode = $this->getLastMoveNode();
+            $moveNode->setMoveNumber(null === $lastMoveNode ? 1
+                : (ColorEnum::WHITE === $moveNode->getColor()
+                    ? $lastMoveNode->getMoveNumber() + 1
+                    : $lastMoveNode->getMoveNumber())
+            );
+        }
+
         $key = $moveNode->getMoveNumber() . (ColorEnum::WHITE === $moveNode->getColor() ? '.' : '...');
         $this->mainLine[$key] = $moveNode;
     }
