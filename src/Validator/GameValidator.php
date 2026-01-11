@@ -4,8 +4,8 @@ namespace Cmuset\PgnParser\Validator;
 
 use Cmuset\PgnParser\Exception\MoveApplyingException;
 use Cmuset\PgnParser\Model\Game;
-use Cmuset\PgnParser\Model\MoveNode;
 use Cmuset\PgnParser\Model\Position;
+use Cmuset\PgnParser\Model\Variation;
 use Cmuset\PgnParser\MoveApplier\MoveApplier;
 use Cmuset\PgnParser\Validator\Model\GameViolation;
 
@@ -20,30 +20,31 @@ class GameValidator
 
     public function validate(Game $game): ?GameViolation
     {
-        return $this->validateLine($game->getInitialPosition(), $game->getMainLine());
+        return $this->validateLine($game->getInitialPosition(), $game->getMainLine(), new Variation());
     }
 
-    /**
-     * @param MoveNode[] $line
-     */
-    private function validateLine(Position $position, array $line, string $movePathPrefix = ''): ?GameViolation
+    private function validateLine(Position $position, Variation $line, Variation $variationPath): ?GameViolation
     {
         $currentPosition = clone $position;
+        $nodeVariationPath = clone $variationPath;
         foreach ($line as $node) {
-            $movePath = $movePathPrefix . $node->getKey();
-            foreach ($node->getVariations() as $variationKey => $variation) {
-                $violation = $this->validateLine($currentPosition, $variation, $movePath . '[' . $variationKey . ']');
+            foreach ($node->getVariations() as $variation) {
+                $violation = $this->validateLine($currentPosition, $variation, $nodeVariationPath);
 
                 if (null !== $violation) {
                     return $violation;
                 }
             }
 
+            $clearedNode = clone $node;
+            $clearedNode->clearAll();
+            $nodeVariationPath->addNode($clearedNode);
+
             try {
                 $currentPosition = $this->moveApplier->apply($currentPosition, $node->getMove());
             } catch (MoveApplyingException $e) {
                 return new GameViolation(
-                    $movePath,
+                    $nodeVariationPath->getPGN(),
                     $e->getMoveViolation(),
                     $e->getPositionViolations()
                 );

@@ -6,6 +6,7 @@ use Cmuset\PgnParser\Enum\ColorEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
 use Cmuset\PgnParser\Model\Move;
 use Cmuset\PgnParser\Model\MoveNode;
+use Cmuset\PgnParser\Model\Variation;
 use PHPUnit\Framework\TestCase;
 
 class MoveNodeTest extends TestCase
@@ -14,7 +15,7 @@ class MoveNodeTest extends TestCase
     {
         $node = new MoveNode();
         $variation = new MoveNode();
-        $node->addVariation([$variation]);
+        $node->addVariation(new Variation($variation));
 
         self::assertCount(1, $node->getVariations());
     }

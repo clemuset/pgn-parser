@@ -43,14 +43,16 @@ use Cmuset\PgnParser\Model\Game;
 $pgn = file_get_contents('path/to/game.pgn');
 $game = Game::fromPGN($pgn);
 
-echo "Result: " . ($game->getResult()?->value ?? '*') . PHP_EOL; // e.g. Result: 1-0
+$game->getResult(); // e.g. ResultEnum::WHITE_WIN
+$game->getMainLine(); // Variation instance
 
 foreach ($game->getMainLine() as $key => $node) {
-    $move = $node->getMove();
-    echo $key . ' ' . $move->getSAN(); // e.g. "1. e4" or "1... e5"
-    if ($comment = $node->getAfterMoveComment()) {
-        echo ' {' . $comment . '}'; // e.g. " {Good central move}"
-    }
+    $key; // e.g. "1." or "10..."
+    
+    $move = $node->getMove(); // Move instance
+    $move->getSAN(); // e.g. "e4" or "Rxd5+"
+    
+    $node->getComment(); // e.g. "Good central move"
 }
 ```
 
@@ -112,13 +114,20 @@ $game->setResult(ResultEnum::WHITE_WIN);
 $node1 = new MoveNode();
 $node1->setMove(Move::fromSAN('e4', ColorEnum::WHITE));
 
-$node2 = new MoveNode();
-$node2->setMove(Move::fromSAN('e5', ColorEnum::BLACK));
+$node2 = new MoveNode(Move::fromSAN('e5', ColorEnum::BLACK));
 
-$game->addMoveNodes($node1, $node2);
+$node3 = new MoveNode('Nf3'); // shorthand constructor
 
-echo $game->getPGN(); // Example output:
-// [Event "Casual Game"]\n[Site "Local"]\n[Result "1-0"]\n\n1. e4 e5 1-0
+$game->addMoveNodes($node1, $node2, $node3);
+// or directly via SAN strings:
+$game->addMoveNodes('e4', 'e5', 'Nf3'); // equivalent
+
+echo $game->getPGN(); // Output:
+// [Event "Casual Game"]
+// [Site "Local"]
+// [Result "1-0"]
+// 
+// 1. e4 e5 2. Nf3 1-0
 ```
 
 ### Iterating Moves & Variations
@@ -227,13 +236,14 @@ Common position checks include: presence of both kings, uniqueness (no duplicate
 
 ## 5. Data Model Overview
 
-| Class      | Purpose                                                                |
-|------------|------------------------------------------------------------------------|
-| `Game`     | Represents a full PGN game (tags, initial position, main line, result) |
-| `MoveNode` | A node in the move tree (move + comments + NAGs + variations)          |
-| `Move`     | A parsed SAN move (piece, destination, capture, promotion, etc.)       |
-| `Position` | A FEN-described board state with piece placement and metadata          |
-| `Square`   | A board square container (enum + piece)                                |
+| Class       | Purpose                                                                |
+|-------------|------------------------------------------------------------------------|
+| `Game`      | Represents a full PGN game (tags, initial position, main line, result) |
+| `Variation` | An iterable object containing MoveNode instances                       |
+| `MoveNode`  | A node in the move tree (move + comments + NAGs + variations)          |
+| `Move`      | A parsed SAN move (piece, destination, capture, promotion, etc.)       |
+| `Position`  | A FEN-described board state with piece placement and metadata          |
+| `Square`    | A board square container (enum + piece)                                |
 
 Exporters (`GameExporter`, `MoveExporter`, `PositionExporter`) turn objects back into textual notation.
 

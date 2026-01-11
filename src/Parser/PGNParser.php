@@ -7,6 +7,7 @@ use Cmuset\PgnParser\Enum\CommentAnchorEnum;
 use Cmuset\PgnParser\Enum\ResultEnum;
 use Cmuset\PgnParser\Model\Game;
 use Cmuset\PgnParser\Model\MoveNode;
+use Cmuset\PgnParser\Model\Variation;
 
 class PGNParser implements PGNParserInterface
 {
@@ -46,7 +47,7 @@ class PGNParser implements PGNParserInterface
         $moveText = trim($moveText);
         $tokens = $this->tokenizeMoveText($moveText);
 
-        $game->setMainLine($this->buildMoveNodeLine($tokens));
+        $game->setMainLine($this->buildVariation($tokens));
 
         return $game;
     }
@@ -105,17 +106,17 @@ class PGNParser implements PGNParserInterface
         return trim($moves);
     }
 
-    private function buildMoveNodeLine(array $tokens, int &$index = 0): array
+    private function buildVariation(array $tokens, int &$index = 0): Variation
     {
         $color = ColorEnum::WHITE;
         $moveNumber = 1;
 
         $tokensCount = count($tokens);
         $nextCommentAnchor = CommentAnchorEnum::PRE;
-        $line = [];
         $currentNode = null;
         $pendingPreComment = null;
 
+        $variation = new Variation();
         while ($index < $tokensCount) {
             $token = $tokens[$index];
             ++$index;
@@ -139,7 +140,7 @@ class PGNParser implements PGNParserInterface
                         $pendingPreComment = null;
                     }
 
-                    $line[ColorEnum::WHITE === $color ? "$moveNumber." : "$moveNumber..."] = $currentNode;
+                    $variation->addNode($currentNode);
 
                     $nextCommentAnchor = CommentAnchorEnum::POST;
                     $color = ColorEnum::WHITE === $color ? ColorEnum::BLACK : ColorEnum::WHITE;
@@ -179,23 +180,23 @@ class PGNParser implements PGNParserInterface
 
                 case self::T_LPAR:
                     // build a variation line recursively starting at current index
-                    $variationLine = $this->buildMoveNodeLine($tokens, $index);
+                    $subVariation = $this->buildVariation($tokens, $index);
 
-                    if ($currentNode && !empty($variationLine)) {
-                        $currentNode->addVariation($variationLine);
+                    if ($currentNode && !$subVariation->isEmpty()) {
+                        $currentNode->addVariation($subVariation);
                     }
                     break;
 
                 case self::T_RESULT:
                 case self::T_RPAR:
-                    return $line;
+                    return $variation;
 
                 default:
                     break;
             }
         }
 
-        return $line;
+        return $variation;
     }
 
     private function tokenizeMoveText(string $moveText): array

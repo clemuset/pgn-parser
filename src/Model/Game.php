@@ -2,7 +2,6 @@
 
 namespace Cmuset\PgnParser\Model;
 
-use Cmuset\PgnParser\Enum\ColorEnum;
 use Cmuset\PgnParser\Enum\ResultEnum;
 use Cmuset\PgnParser\Exporter\GameExporter;
 use Cmuset\PgnParser\Parser\PGNParser;
@@ -12,9 +11,13 @@ class Game
     /** @var array<string,string> */
     private array $tags = [];
     private ?Position $initialPosition = null;
-    /** @var array<MoveNode> */
-    private array $mainLine = [];
+    private Variation $mainLine;
     private ?ResultEnum $result = null;
+
+    public function __construct()
+    {
+        $this->mainLine = new Variation();
+    }
 
     public static function fromPGN(string $pgn): self
     {
@@ -45,43 +48,33 @@ class Game
         $this->initialPosition = $initialPosition;
     }
 
-    /** @return array<MoveNode> */
-    public function getMainLine(): array
+    public function getMainLine(): Variation
     {
         return $this->mainLine;
     }
 
-    /** @param array<MoveNode> $mainLine */
-    public function setMainLine(array $mainLine): void
+    public function setMainLine(Variation $mainLine): void
     {
         $this->mainLine = $mainLine;
     }
 
     public function getLastMoveNode(): ?MoveNode
     {
-        if (empty($this->mainLine)) {
-            return null;
-        }
-
-        return end($this->mainLine);
+        return $this->mainLine->getLastMoveNode();
     }
 
-    public function addMoveNode(MoveNode $moveNode): void
+    /**
+     * @param string|MoveNode $moveNode can be a SAN string or a MoveNode object
+     */
+    public function addMoveNode(string|MoveNode $moveNode): void
     {
-        if (null === $moveNode->getMoveNumber()) {
-            $lastMoveNode = $this->getLastMoveNode();
-            $moveNode->setMoveNumber(null === $lastMoveNode ? 1
-                : (ColorEnum::WHITE === $moveNode->getColor()
-                    ? $lastMoveNode->getMoveNumber() + 1
-                    : $lastMoveNode->getMoveNumber())
-            );
-        }
-
-        $key = $moveNode->getMoveNumber() . (ColorEnum::WHITE === $moveNode->getColor() ? '.' : '...');
-        $this->mainLine[$key] = $moveNode;
+        $this->mainLine->addNode(is_string($moveNode) ? new MoveNode($moveNode) : $moveNode);
     }
 
-    public function addMoveNodes(MoveNode ...$moveNodes): void
+    /**
+     * @param string|MoveNode ...$moveNodes can be SAN strings or MoveNode objects
+     */
+    public function addMoveNodes(string|MoveNode ...$moveNodes): void
     {
         foreach ($moveNodes as $moveNode) {
             $this->addMoveNode($moveNode);
@@ -132,12 +125,7 @@ class Game
 
     public function __clone(): void
     {
-        $clonedMainLine = [];
-        foreach ($this->mainLine as $key => $moveNode) {
-            $clonedMainLine[$key] = clone $moveNode;
-        }
-        $this->mainLine = $clonedMainLine;
-
+        $this->mainLine = clone $this->mainLine;
         $this->initialPosition = $this->initialPosition ? clone $this->initialPosition : null;
     }
 }

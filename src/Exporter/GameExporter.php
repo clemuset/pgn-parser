@@ -5,6 +5,7 @@ namespace Cmuset\PgnParser\Exporter;
 use Cmuset\PgnParser\Enum\ColorEnum;
 use Cmuset\PgnParser\Model\Game;
 use Cmuset\PgnParser\Model\MoveNode;
+use Cmuset\PgnParser\Model\Variation;
 
 class GameExporter implements GameExporterInterface
 {
@@ -18,8 +19,12 @@ class GameExporter implements GameExporterInterface
         return new self(new MoveExporter());
     }
 
-    public function export(Game $game): string
+    public function export(Game|Variation $game): string
     {
+        if ($game instanceof Variation) {
+            return trim($this->exportLine($game));
+        }
+
         $pgn = '';
 
         // Export tags
@@ -35,7 +40,7 @@ class GameExporter implements GameExporterInterface
         return trim($pgn);
     }
 
-    private function exportLine(array $line): string
+    private function exportLine(Variation $line): string
     {
         $pgn = '';
         $ellipsis = true;

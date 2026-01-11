@@ -56,4 +56,22 @@ enum PieceEnum: string
     {
         return in_array($this, [self::WHITE_PAWN, self::BLACK_PAWN], true);
     }
+
+    public function opposite(): self
+    {
+        return match ($this) {
+            self::WHITE_KING => self::BLACK_KING,
+            self::WHITE_QUEEN => self::BLACK_QUEEN,
+            self::WHITE_ROOK => self::BLACK_ROOK,
+            self::WHITE_BISHOP => self::BLACK_BISHOP,
+            self::WHITE_KNIGHT => self::BLACK_KNIGHT,
+            self::WHITE_PAWN => self::BLACK_PAWN,
+            self::BLACK_KING => self::WHITE_KING,
+            self::BLACK_QUEEN => self::WHITE_QUEEN,
+            self::BLACK_ROOK => self::WHITE_ROOK,
+            self::BLACK_BISHOP => self::WHITE_BISHOP,
+            self::BLACK_KNIGHT => self::WHITE_KNIGHT,
+            self::BLACK_PAWN => self::WHITE_PAWN,
+        };
+    }
 }

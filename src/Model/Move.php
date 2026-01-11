@@ -33,7 +33,7 @@ class Move
         return new MoveExporter()->export($this);
     }
 
-    public function getPiece(): PieceEnum
+    public function getPiece(): ?PieceEnum
     {
         return $this->piece;
     }

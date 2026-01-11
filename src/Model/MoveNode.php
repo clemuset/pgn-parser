@@ -15,8 +15,14 @@ class MoveNode
     /** @var int[] */
     private array $nags = [];
 
-    /** @var array<array<MoveNode>> */
+    /** @var array<Variation> */
     private array $variations = [];
+
+    public function __construct(string|Move|null $move = null, ?int $moveNumber = null)
+    {
+        $this->move = is_string($move) ? Move::fromSAN($move) : $move;
+        $this->moveNumber = $moveNumber;
+    }
 
     public function getMove(): ?Move
     {
@@ -40,7 +46,7 @@ class MoveNode
 
     public function getColor(): ?ColorEnum
     {
-        return $this->move->getPiece()->color();
+        return $this->move?->getPiece()?->color();
     }
 
     public function getBeforeMoveComment(): ?string
@@ -94,20 +100,13 @@ class MoveNode
         }
     }
 
-    /** @return array<array<MoveNode>> */
+    /** @return array<Variation> */
     public function getVariations(): array
     {
         return $this->variations;
     }
 
-    /** @param array<array<MoveNode>> $variations */
-    public function setVariations(array $variations): void
-    {
-        $this->variations = $variations;
-    }
-
-    /** @param array<MoveNode> $variationLine */
-    public function addVariation(array $variationLine): void
+    public function addVariation(Variation $variationLine): void
     {
         $this->variations[] = $variationLine;
     }
@@ -141,15 +140,22 @@ class MoveNode
         }
     }
 
+    public function clearVariations(): void
+    {
+        $this->variations = [];
+    }
+
+    public function clearAll(): void
+    {
+        $this->clearComments();
+        $this->clearVariations();
+    }
+
     public function __clone(): void
     {
         $clonedVariations = [];
         foreach ($this->variations as $variationLine) {
-            $clonedLine = [];
-            foreach ($variationLine as $moveNode) {
-                $clonedLine[] = clone $moveNode;
-            }
-            $clonedVariations[] = $clonedLine;
+            $clonedVariations[] = clone $variationLine;
         }
         $this->variations = $clonedVariations;
     }
