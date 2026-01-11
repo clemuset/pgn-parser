@@ -1,4 +1,4 @@
-# PGN Parser for PHP
+# ♟️ Chess PGN Parser for PHP ♟️
 
 A lightweight PHP library to parse and export chess game notations:
 
