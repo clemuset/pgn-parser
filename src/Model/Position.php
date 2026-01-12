@@ -151,9 +151,11 @@ class Position
         return $this->squares[$square->value]->getPiece();
     }
 
-    public function applyMove(Move $move): Position
+    public function applyMove(string|Move $move): void
     {
-        return new MoveApplier()->apply($this, $move);
+        $move = is_string($move) ? Move::fromSAN($move, $this->sideToMove) : $move;
+
+        MoveApplier::create()->apply($this, $move);
     }
 
     /**
@@ -240,7 +242,7 @@ class Position
                 $cloneMove->setTo($coordinates);
 
                 try {
-                    $this->applyMove($cloneMove);
+                    (clone $this)->applyMove($cloneMove);
                     $legalMoves[] = $cloneMove;
                 } catch (\Exception) {
                 }
@@ -258,7 +260,7 @@ class Position
             $move->setCastling($castlingRight);
 
             try {
-                $this->applyMove($move);
+                (clone $this)->applyMove($move);
                 $legalMoves[] = $move;
             } catch (\Exception) {
             }

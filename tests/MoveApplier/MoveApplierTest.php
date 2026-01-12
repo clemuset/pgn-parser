@@ -6,9 +6,9 @@ use Cmuset\PgnParser\Enum\CastlingEnum;
 use Cmuset\PgnParser\Enum\ColorEnum;
 use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Exception\MoveApplyingException;
 use Cmuset\PgnParser\Model\Move;
 use Cmuset\PgnParser\Model\Position;
+use Cmuset\PgnParser\MoveApplier\Exception\MoveApplyingException;
 use Cmuset\PgnParser\MoveApplier\MoveApplier;
 use Cmuset\PgnParser\Parser\PGNParser;
 use PHPUnit\Framework\TestCase;
@@ -27,11 +27,11 @@ class MoveApplierTest extends TestCase
         $position = Position::fromFEN(PGNParser::INITIAL_FEN);
         $move = Move::fromSAN('e4', ColorEnum::WHITE);
 
-        $newPosition = $this->applier->apply($position, $move);
+        $this->applier->apply($position, $move);
 
-        self::assertSame(PieceEnum::WHITE_PAWN, $newPosition->getPieceAt(CoordinatesEnum::E4));
-        self::assertNull($newPosition->getPieceAt(CoordinatesEnum::E2));
-        self::assertSame(ColorEnum::BLACK, $newPosition->getSideToMove());
+        self::assertSame(PieceEnum::WHITE_PAWN, $position->getPieceAt(CoordinatesEnum::E4));
+        self::assertNull($position->getPieceAt(CoordinatesEnum::E2));
+        self::assertSame(ColorEnum::BLACK, $position->getSideToMove());
     }
 
     public function testApplyMoveMaintainsCastlingRights(): void
@@ -39,16 +39,16 @@ class MoveApplierTest extends TestCase
         $position = Position::fromFEN(PGNParser::INITIAL_FEN);
         $move = Move::fromSAN('e4', ColorEnum::WHITE);
 
-        $newPosition = $this->applier->apply($position, $move);
+        $this->applier->apply($position, $move);
 
         // White castling rights should remain after white's move
-        self::assertTrue($newPosition->hasCastlingRight(CastlingEnum::WHITE_KINGSIDE));
+        self::assertTrue($position->hasCastlingRight(CastlingEnum::WHITE_KINGSIDE));
 
         $move = Move::fromSAN('e5', ColorEnum::BLACK);
-        $newPosition = $this->applier->apply($newPosition, $move);
+        $this->applier->apply($position, $move);
 
         // Still should have castling rights before moving king/rook
-        self::assertTrue($newPosition->hasCastlingRight(CastlingEnum::WHITE_KINGSIDE));
+        self::assertTrue($position->hasCastlingRight(CastlingEnum::WHITE_KINGSIDE));
     }
 
     public function testApplyMoveRemovesCastlingRightsWhenKingMoves(): void
@@ -56,11 +56,11 @@ class MoveApplierTest extends TestCase
         $position = Position::fromFEN('r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1');
         $move = Move::fromSAN('Ke2', ColorEnum::WHITE);
 
-        $newPosition = $this->applier->apply($position, $move);
+        $this->applier->apply($position, $move);
 
-        self::assertFalse($newPosition->hasCastlingRight(CastlingEnum::WHITE_KINGSIDE));
-        self::assertFalse($newPosition->hasCastlingRight(CastlingEnum::WHITE_QUEENSIDE));
-        self::assertTrue($newPosition->hasCastlingRight(CastlingEnum::BLACK_KINGSIDE));
+        self::assertFalse($position->hasCastlingRight(CastlingEnum::WHITE_KINGSIDE));
+        self::assertFalse($position->hasCastlingRight(CastlingEnum::WHITE_QUEENSIDE));
+        self::assertTrue($position->hasCastlingRight(CastlingEnum::BLACK_KINGSIDE));
     }
 
     public function testApplyMoveRemovesCastlingRightsWhenRookMovesFromQueenside(): void
@@ -68,10 +68,10 @@ class MoveApplierTest extends TestCase
         $position = Position::fromFEN('r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1');
         $move = Move::fromSAN('Ra2', ColorEnum::WHITE);
 
-        $newPosition = $this->applier->apply($position, $move);
+        $this->applier->apply($position, $move);
 
-        self::assertFalse($newPosition->hasCastlingRight(CastlingEnum::WHITE_QUEENSIDE));
-        self::assertTrue($newPosition->hasCastlingRight(CastlingEnum::WHITE_KINGSIDE));
+        self::assertFalse($position->hasCastlingRight(CastlingEnum::WHITE_QUEENSIDE));
+        self::assertTrue($position->hasCastlingRight(CastlingEnum::WHITE_KINGSIDE));
     }
 
     public function testApplyMoveIncrementsHalfmoveClockForNonCaptureMove(): void
@@ -79,9 +79,9 @@ class MoveApplierTest extends TestCase
         $position = Position::fromFEN(PGNParser::INITIAL_FEN);
         $move = Move::fromSAN('e4', ColorEnum::WHITE);
 
-        $newPosition = $this->applier->apply($position, $move);
+        $this->applier->apply($position, $move);
 
-        self::assertSame(0, $newPosition->getHalfmoveClock());
+        self::assertSame(0, $position->getHalfmoveClock());
     }
 
     public function testApplyMoveResetsHalfmoveClockForPawnMove(): void
@@ -90,9 +90,9 @@ class MoveApplierTest extends TestCase
         $position->setHalfmoveClock(5);
         $move = Move::fromSAN('e5', ColorEnum::BLACK);
 
-        $newPosition = $this->applier->apply($position, $move);
+        $this->applier->apply($position, $move);
 
-        self::assertSame(0, $newPosition->getHalfmoveClock());
+        self::assertSame(0, $position->getHalfmoveClock());
     }
 
     public function testApplyMoveSwitchesColor(): void
@@ -100,23 +100,23 @@ class MoveApplierTest extends TestCase
         $position = Position::fromFEN(PGNParser::INITIAL_FEN);
         $move = Move::fromSAN('e4', ColorEnum::WHITE);
 
-        $newPosition = $this->applier->apply($position, $move);
+        $this->applier->apply($position, $move);
 
-        self::assertSame(ColorEnum::BLACK, $newPosition->getSideToMove());
+        self::assertSame(ColorEnum::BLACK, $position->getSideToMove());
     }
 
     public function testApplyMoveIncrementsFullmoveNumberAfterBlackMove(): void
     {
         $position = Position::fromFEN(PGNParser::INITIAL_FEN);
         $move = Move::fromSAN('e4', ColorEnum::WHITE);
-        $newPosition = $this->applier->apply($position, $move);
+        $this->applier->apply($position, $move);
 
-        self::assertSame(1, $newPosition->getFullmoveNumber());
+        self::assertSame(1, $position->getFullmoveNumber());
 
         $move = Move::fromSAN('e5', ColorEnum::BLACK);
-        $newPosition = $this->applier->apply($newPosition, $move);
+        $this->applier->apply($position, $move);
 
-        self::assertSame(2, $newPosition->getFullmoveNumber());
+        self::assertSame(2, $position->getFullmoveNumber());
     }
 
     public function testApplyMoveThrowsExceptionForWrongColorToMove(): void
@@ -161,26 +161,26 @@ class MoveApplierTest extends TestCase
     {
         $position = Position::fromFEN(PGNParser::INITIAL_FEN);
         $move = Move::fromSAN('e4', ColorEnum::WHITE);
-        $newPosition = $this->applier->apply($position, $move);
-        self::assertSame(CoordinatesEnum::E3, $newPosition->getEnPassantTarget());
+        $this->applier->apply($position, $move);
+        self::assertSame(CoordinatesEnum::E3, $position->getEnPassantTarget());
 
         $move = Move::fromSAN('d5', ColorEnum::BLACK);
-        $newPosition = $this->applier->apply($newPosition, $move);
-        self::assertSame(CoordinatesEnum::D6, $newPosition->getEnPassantTarget());
+        $this->applier->apply($position, $move);
+        self::assertSame(CoordinatesEnum::D6, $position->getEnPassantTarget());
 
         $move = Move::fromSAN('Nf3', ColorEnum::WHITE);
-        $newPosition = $this->applier->apply($newPosition, $move);
-        self::assertNull($newPosition->getEnPassantTarget());
+        $this->applier->apply($position, $move);
+        self::assertNull($position->getEnPassantTarget());
     }
 
     public function testCanCastling(): void
     {
         $position = Position::fromFEN('r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1');
         $move = Move::fromSAN('O-O', ColorEnum::WHITE);
-        $newPosition = $this->applier->apply($position, $move);
-        self::assertSame(PieceEnum::WHITE_KING, $newPosition->getPieceAt(CoordinatesEnum::G1));
-        self::assertSame(PieceEnum::WHITE_ROOK, $newPosition->getPieceAt(CoordinatesEnum::F1));
-        self::assertNull($newPosition->getPieceAt(CoordinatesEnum::E1));
-        self::assertNull($newPosition->getPieceAt(CoordinatesEnum::H1));
+        $this->applier->apply($position, $move);
+        self::assertSame(PieceEnum::WHITE_KING, $position->getPieceAt(CoordinatesEnum::G1));
+        self::assertSame(PieceEnum::WHITE_ROOK, $position->getPieceAt(CoordinatesEnum::F1));
+        self::assertNull($position->getPieceAt(CoordinatesEnum::E1));
+        self::assertNull($position->getPieceAt(CoordinatesEnum::H1));
     }
 }

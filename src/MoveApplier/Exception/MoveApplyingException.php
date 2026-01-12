@@ -1,6 +1,6 @@
 <?php
 
-namespace Cmuset\PgnParser\Exception;
+namespace Cmuset\PgnParser\MoveApplier\Exception;
 
 use Cmuset\PgnParser\Validator\Enum\MoveViolationEnum;
 use Cmuset\PgnParser\Validator\Enum\PositionViolationEnum;

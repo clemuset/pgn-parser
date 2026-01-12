@@ -180,12 +180,16 @@ $position = Position::fromFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQk
 use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
 
-$piece = $position->getPieceAt(CoordinatesEnum::E2); // e.g. white pawn enum instance
+$piece = $position->getPieceAt(CoordinatesEnum::E2); // e.g. PieceEnum::WHITE_PAWN
 
 // Modify then export
 $position->setPieceAt(CoordinatesEnum::E4, PieceEnum::WHITE_PAWN); // places a white pawn on e4 (illustrative)
 $position->setPieceAt(CoordinatesEnum::E2, null); // removes piece from e2
-echo $position->getFEN(); // e.g. "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1"
+$position->toggleSideToMove();
+// Or
+$position = $position->applyMove('e4'); // applies move e4 properly
+
+echo $position->getFEN(); // e.g. "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
 ```
 
 ### Applying Moves (MoveApplier)
@@ -193,11 +197,7 @@ echo $position->getFEN(); // e.g. "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR
 Apply a SAN move to a `Position`, with full rules handling (castling rights, en passant, promotion, counters):
 
 ```php
-use Cmuset\PgnParser\Model\Position;
-use Cmuset\PgnParser\Model\Move;
-use Cmuset\PgnParser\Enum\ColorEnum;
-use Cmuset\PgnParser\Parser\PGNParser;
-use Cmuset\PgnParser\Exception\MoveApplyingException;
+use Cmuset\PgnParser\Enum\ColorEnum;use Cmuset\PgnParser\Model\Move;use Cmuset\PgnParser\Model\Position;use Cmuset\PgnParser\MoveApplier\Exception\MoveApplyingException;use Cmuset\PgnParser\Parser\PGNParser;
 
 $pos = Position::fromFEN(PGNParser::INITIAL_FEN);
 try {
@@ -205,12 +205,12 @@ try {
     // $pos->getSideToMove() is now BLACK; halfmove/fullmove counters updated; castling rights maintained
 } catch (MoveApplyingException $e) {
     // Inspect the violation(s)
-    $moveViolation = $e->getMoveViolation(); // MoveViolationEnum|null
+    $moveViolation = $e->getMoveViolation(); // MoveViolationEnum
     $positionViolations = $e->getPositionViolations(); // PositionViolationEnum[]
 }
 
 // Generate legal moves for the side to move
-$legalMoves = $pos->getLegalMoves(); // array of Move
+$legalMoves = $pos->getLegalMoves(); // Move[]
 ```
 
 ### Validation (PositionValidator & GameValidator)

@@ -5,13 +5,13 @@ namespace Cmuset\PgnParser\MoveApplier\PieceMoveApplier;
 use Cmuset\PgnParser\Enum\CastlingEnum;
 use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Exception\MoveApplyingException;
 use Cmuset\PgnParser\Model\Move;
 use Cmuset\PgnParser\Model\Position;
+use Cmuset\PgnParser\MoveApplier\Exception\MoveApplyingException;
 use Cmuset\PgnParser\MoveApplier\MoveHelper;
 use Cmuset\PgnParser\Validator\Enum\MoveViolationEnum;
 
-class KingMoveApplier extends AbstractPieceMoveApplier
+class KingMoveApplier extends PieceMoveApplier
 {
     public function apply(Position $position, Move $move): void
     {

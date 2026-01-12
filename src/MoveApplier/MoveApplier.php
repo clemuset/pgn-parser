@@ -5,34 +5,25 @@ namespace Cmuset\PgnParser\MoveApplier;
 use Cmuset\PgnParser\Enum\CastlingEnum;
 use Cmuset\PgnParser\Enum\ColorEnum;
 use Cmuset\PgnParser\Enum\CoordinatesEnum;
-use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Exception\MoveApplyingException;
 use Cmuset\PgnParser\Model\Move;
 use Cmuset\PgnParser\Model\Position;
-use Cmuset\PgnParser\MoveApplier\PieceMoveApplier\BishopMoveApplier;
-use Cmuset\PgnParser\MoveApplier\PieceMoveApplier\KingMoveApplier;
-use Cmuset\PgnParser\MoveApplier\PieceMoveApplier\KnightMoveApplier;
-use Cmuset\PgnParser\MoveApplier\PieceMoveApplier\PawnMoveApplier;
-use Cmuset\PgnParser\MoveApplier\PieceMoveApplier\QueenMoveApplier;
-use Cmuset\PgnParser\MoveApplier\PieceMoveApplier\RookMoveApplier;
+use Cmuset\PgnParser\MoveApplier\Exception\MoveApplyingException;
+use Cmuset\PgnParser\MoveApplier\PieceMoveApplier\PieceMoveApplier;
 use Cmuset\PgnParser\Validator\Enum\MoveViolationEnum;
 use Cmuset\PgnParser\Validator\PositionValidator;
 
-class MoveApplier
+class MoveApplier implements MoveApplierInterface
 {
-    public function apply(Position $previousPosition, Move $move): Position
+    public static function create(): self
     {
-        $position = clone $previousPosition;
+        return new self();
+    }
+
+    public function apply(Position $position, Move $move): void
+    {
         $pieceToMove = $move->getPiece();
 
-        $pieceMoveApplier = match ($pieceToMove) {
-            PieceEnum::WHITE_KING, PieceEnum::BLACK_KING => new KingMoveApplier(),
-            PieceEnum::WHITE_QUEEN, PieceEnum::BLACK_QUEEN => new QueenMoveApplier(),
-            PieceEnum::WHITE_ROOK, PieceEnum::BLACK_ROOK => new RookMoveApplier(),
-            PieceEnum::WHITE_BISHOP, PieceEnum::BLACK_BISHOP => new BishopMoveApplier(),
-            PieceEnum::WHITE_KNIGHT, PieceEnum::BLACK_KNIGHT => new KnightMoveApplier(),
-            default => new PawnMoveApplier(),
-        };
+        $pieceMoveApplier = PieceMoveApplier::createFromPiece($pieceToMove);
 
         $this->throwMoveViolationException($position, $move);
 
@@ -65,8 +56,6 @@ class MoveApplier
         if (count($positionViolations) > 0) {
             throw new MoveApplyingException(MoveViolationEnum::NEXT_POSITION_INVALID, $positionViolations);
         }
-
-        return $position;
     }
 
     private function handleCastlingRights(Position $position, Move $move): void

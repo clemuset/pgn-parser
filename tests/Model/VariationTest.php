@@ -35,7 +35,7 @@ class VariationTest extends TestCase
 
         self::assertCount(0, $variation);
         self::assertTrue($variation->isEmpty());
-        self::assertNull($variation->getLastMoveNode());
+        self::assertNull($variation->getLastNode());
     }
 
     public function testAddSingleNode(): void
@@ -48,7 +48,7 @@ class VariationTest extends TestCase
         $variation->addNode($node);
 
         self::assertCount(1, $variation);
-        self::assertSame($node, $variation->getLastMoveNode());
+        self::assertSame($node, $variation->getLastNode());
         self::assertSame(1, $node->getMoveNumber());
         self::assertSame('e4', $variation->getIdentifier());
     }
@@ -69,7 +69,7 @@ class VariationTest extends TestCase
         $variation->addNodes($node1, $node2);
 
         self::assertCount(2, $variation);
-        self::assertSame($node2, $variation->getLastMoveNode());
+        self::assertSame($node2, $variation->getLastNode());
     }
 
     public function testMoveNumberAutoIncrement(): void

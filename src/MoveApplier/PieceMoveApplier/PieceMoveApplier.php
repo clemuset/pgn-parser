@@ -3,14 +3,27 @@
 namespace Cmuset\PgnParser\MoveApplier\PieceMoveApplier;
 
 use Cmuset\PgnParser\Enum\CoordinatesEnum;
-use Cmuset\PgnParser\Exception\MoveApplyingException;
+use Cmuset\PgnParser\Enum\PieceEnum;
 use Cmuset\PgnParser\Model\Move;
 use Cmuset\PgnParser\Model\Position;
 use Cmuset\PgnParser\Model\Square;
+use Cmuset\PgnParser\MoveApplier\Exception\MoveApplyingException;
 use Cmuset\PgnParser\Validator\Enum\MoveViolationEnum;
 
-abstract class AbstractPieceMoveApplier
+abstract class PieceMoveApplier
 {
+    public static function createFromPiece(PieceEnum $piece): PieceMoveApplier
+    {
+        return match ($piece) {
+            PieceEnum::WHITE_KING, PieceEnum::BLACK_KING => new KingMoveApplier(),
+            PieceEnum::WHITE_QUEEN, PieceEnum::BLACK_QUEEN => new QueenMoveApplier(),
+            PieceEnum::WHITE_ROOK, PieceEnum::BLACK_ROOK => new RookMoveApplier(),
+            PieceEnum::WHITE_BISHOP, PieceEnum::BLACK_BISHOP => new BishopMoveApplier(),
+            PieceEnum::WHITE_KNIGHT, PieceEnum::BLACK_KNIGHT => new KnightMoveApplier(),
+            default => new PawnMoveApplier(),
+        };
+    }
+
     public function apply(Position $position, Move $move): void
     {
         $potentialSquares = [];

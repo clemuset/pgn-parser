@@ -5,7 +5,7 @@ namespace Cmuset\PgnParser\Tests\Parser;
 use Cmuset\PgnParser\Enum\CastlingEnum;
 use Cmuset\PgnParser\Enum\ColorEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Exception\SANParsingException;
+use Cmuset\PgnParser\Parser\Exception\SANParsingException;
 use Cmuset\PgnParser\Parser\SANParser;
 use PHPUnit\Framework\TestCase;
 

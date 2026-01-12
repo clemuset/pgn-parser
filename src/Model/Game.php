@@ -5,6 +5,8 @@ namespace Cmuset\PgnParser\Model;
 use Cmuset\PgnParser\Enum\ResultEnum;
 use Cmuset\PgnParser\Exporter\GameExporter;
 use Cmuset\PgnParser\Parser\PGNParser;
+use Cmuset\PgnParser\Splitter\SplitOptions;
+use Cmuset\PgnParser\Splitter\VariationSplitter;
 
 class Game
 {
@@ -38,6 +40,14 @@ class Game
         return GameExporter::create()->export($clonedGame);
     }
 
+    /**
+     * @return Variation[]
+     */
+    public function split(?SplitOptions $options = null): array
+    {
+        return VariationSplitter::create($options)->split($this);
+    }
+
     public function getInitialPosition(): Position
     {
         return $this->initialPosition;
@@ -60,7 +70,7 @@ class Game
 
     public function getLastMoveNode(): ?MoveNode
     {
-        return $this->mainLine->getLastMoveNode();
+        return $this->mainLine->getLastNode();
     }
 
     /**
@@ -118,9 +128,7 @@ class Game
 
     public function clearAllComments(): void
     {
-        foreach ($this->mainLine as $moveNode) {
-            $moveNode->clearAllComments();
-        }
+        $this->mainLine->clearAllComments();
     }
 
     public function __clone(): void

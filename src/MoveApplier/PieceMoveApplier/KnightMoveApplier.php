@@ -6,7 +6,7 @@ use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Model\Position;
 use Cmuset\PgnParser\MoveApplier\MoveHelper;
 
-class KnightMoveApplier extends AbstractPieceMoveApplier
+class KnightMoveApplier extends PieceMoveApplier
 {
     public function isAttacking(CoordinatesEnum $from, CoordinatesEnum $to, Position $position): bool
     {

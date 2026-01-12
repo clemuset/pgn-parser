@@ -6,8 +6,8 @@ use Cmuset\PgnParser\Enum\CastlingEnum;
 use Cmuset\PgnParser\Enum\ColorEnum;
 use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Exception\FENParsingException;
 use Cmuset\PgnParser\Model\Position;
+use Cmuset\PgnParser\Parser\Exception\FENParsingException;
 
 class FENParser implements FENParserInterface
 {

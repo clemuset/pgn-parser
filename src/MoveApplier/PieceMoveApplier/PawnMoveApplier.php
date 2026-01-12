@@ -7,7 +7,7 @@ use Cmuset\PgnParser\Model\Move;
 use Cmuset\PgnParser\Model\Position;
 use Cmuset\PgnParser\MoveApplier\MoveHelper;
 
-class PawnMoveApplier extends AbstractPieceMoveApplier
+class PawnMoveApplier extends PieceMoveApplier
 {
     public function apply(Position $position, Move $move): void
     {

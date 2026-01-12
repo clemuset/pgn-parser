@@ -2,14 +2,14 @@
 
 namespace Cmuset\PgnParser\Validator;
 
-use Cmuset\PgnParser\Exception\MoveApplyingException;
 use Cmuset\PgnParser\Model\Game;
 use Cmuset\PgnParser\Model\Position;
 use Cmuset\PgnParser\Model\Variation;
+use Cmuset\PgnParser\MoveApplier\Exception\MoveApplyingException;
 use Cmuset\PgnParser\MoveApplier\MoveApplier;
 use Cmuset\PgnParser\Validator\Model\GameViolation;
 
-class GameValidator
+class GameValidator implements GameValidatorInterface
 {
     private readonly MoveApplier $moveApplier;
 
@@ -41,7 +41,7 @@ class GameValidator
             $nodeVariationPath->addNode($clearedNode);
 
             try {
-                $currentPosition = $this->moveApplier->apply($currentPosition, $node->getMove());
+                $this->moveApplier->apply($currentPosition, $node->getMove());
             } catch (MoveApplyingException $e) {
                 return new GameViolation(
                     $nodeVariationPath->getPGN(),

@@ -1,6 +1,6 @@
 <?php
 
-namespace Cmuset\PgnParser\Exception;
+namespace Cmuset\PgnParser\Parser\Exception;
 
 class ParsingException extends \Exception
 {

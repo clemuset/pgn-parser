@@ -7,7 +7,7 @@ use Cmuset\PgnParser\Enum\PieceEnum;
 use Cmuset\PgnParser\Model\Position;
 use Cmuset\PgnParser\Validator\Enum\PositionViolationEnum;
 
-class PositionValidator
+class PositionValidator implements PositionValidatorInterface
 {
     /**
      * @return PositionViolationEnum[]

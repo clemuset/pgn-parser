@@ -53,7 +53,7 @@ class PositionTest extends TestCase
     public function testGetLegalMovesAfterSimpleMove(): void
     {
         $position = Position::fromFEN(PGNParser::INITIAL_FEN);
-        $position = $position->applyMove(Move::fromSAN('e4', ColorEnum::WHITE));
+        $position->applyMove(Move::fromSAN('e4', ColorEnum::WHITE));
         $moves = $position->getLegalMoves();
         self::assertSame(ColorEnum::BLACK, $position->getSideToMove());
         self::assertCount(20, $moves, 'After e4, black should still have 20 legal moves');
@@ -88,6 +88,30 @@ class PositionTest extends TestCase
 
         // Build SAN set to quickly check that Re1-e2 pinned illegal move (e2->e1 occupies own king square) is not present
         $sanSet = array_map(fn (Move $m) => $m->getSAN(), $moves);
-        self::assertFalse(in_array('Re1', $sanSet, true));
+        self::assertNotContains('Re1', $sanSet);
+    }
+
+    public function testApplyingMoveUpdatesPositionCorrectly(): void
+    {
+        $position = Position::fromFEN(PGNParser::INITIAL_FEN);
+        $position->applyMove('e4');
+
+        self::assertNull($position->getPieceAt(CoordinatesEnum::E2));
+        self::assertSame(PieceEnum::WHITE_PAWN, $position->getPieceAt(CoordinatesEnum::E4));
+        self::assertSame(ColorEnum::BLACK, $position->getSideToMove());
+        self::assertSame(0, $position->getHalfmoveClock());
+        self::assertSame(1, $position->getFullmoveNumber());
+
+        $position->applyMove('e5');
+        self::assertSame(PieceEnum::BLACK_PAWN, $position->getPieceAt(CoordinatesEnum::E5));
+        self::assertSame(ColorEnum::WHITE, $position->getSideToMove());
+        self::assertSame(0, $position->getHalfmoveClock());
+        self::assertSame(2, $position->getFullmoveNumber());
+
+        $position->applyMove('Nf3');
+        self::assertSame(PieceEnum::WHITE_KNIGHT, $position->getPieceAt(CoordinatesEnum::F3));
+        self::assertSame(ColorEnum::BLACK, $position->getSideToMove());
+        self::assertSame(0, $position->getHalfmoveClock());
+        self::assertSame(2, $position->getFullmoveNumber());
     }
 }

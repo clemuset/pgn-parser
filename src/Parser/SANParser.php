@@ -6,8 +6,8 @@ use Cmuset\PgnParser\Enum\CastlingEnum;
 use Cmuset\PgnParser\Enum\ColorEnum;
 use Cmuset\PgnParser\Enum\CoordinatesEnum;
 use Cmuset\PgnParser\Enum\PieceEnum;
-use Cmuset\PgnParser\Exception\SANParsingException;
 use Cmuset\PgnParser\Model\Move;
+use Cmuset\PgnParser\Parser\Exception\SANParsingException;
 
 class SANParser implements SANParserInterface
 {

@@ -4,7 +4,7 @@ namespace Cmuset\PgnParser\Tests\Parser;
 
 use Cmuset\PgnParser\Enum\CastlingEnum;
 use Cmuset\PgnParser\Enum\ColorEnum;
-use Cmuset\PgnParser\Exception\FENParsingException;
+use Cmuset\PgnParser\Parser\Exception\FENParsingException;
 use Cmuset\PgnParser\Parser\FENParser;
 use Cmuset\PgnParser\Parser\PGNParser;
 use PHPUnit\Framework\TestCase;
