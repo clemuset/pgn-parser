@@ -8,28 +8,16 @@ use Cmuset\PgnParser\Model\Variation;
 
 class VariationSplitter implements VariationSplitterInterface
 {
-    public function __construct(
-        private ?SplitOptions $options = null,
-    ) {
-        if (null === $this->options) {
-            $this->options = new SplitOptions();
-        }
-    }
-
-    public static function create(?SplitOptions $options = null): self
+    public static function create(): self
     {
-        return new self($options);
+        return new self();
     }
 
     /**
      * @return Variation[]
      */
-    public function split(Game|Variation $variation, ?SplitOptions $options = null): array
+    public function split(Game|Variation $variation): array
     {
-        if (null !== $options) {
-            $this->options = $options;
-        }
-
         if ($variation instanceof Game) {
             $variation = $variation->getMainLine();
         }
@@ -38,9 +26,9 @@ class VariationSplitter implements VariationSplitterInterface
         $variations = array_merge([clone $variation], $this->extractAllVariations($variation));
 
         // Clear variations from all sub variations
-        array_map(fn (Variation $variation) => $variation->clearVariations($this->options->colorToSplit), $variations);
+        array_map(fn (Variation $variation) => $variation->clearVariations(), $variations);
 
-        return $variations;
+        return $this->variationArrayUnique($variations);
     }
 
     /**
@@ -50,32 +38,26 @@ class VariationSplitter implements VariationSplitterInterface
     {
         $allVariations = [];
 
+        $moves = [];
         /** @var MoveNode $node */
         foreach ($variation as $node) {
-            if (null !== $this->options->colorToSplit && $node->getColor() !== $this->options->colorToSplit) {
-                continue;
-            }
-
             foreach ($node->getVariations() as $subVariation) {
-                $cleanedVariation = $this->cloneVariation($subVariation, $variation);
+                $cleanedVariation = $this->cloneVariation($subVariation, $moves);
                 $allVariations[] = $cleanedVariation;
 
                 $nestedVariations = $this->extractAllVariations($cleanedVariation);
                 $allVariations = array_merge($allVariations, $nestedVariations);
             }
+
+            $moves[] = clone $node;
         }
 
         return $allVariations;
     }
 
-    private function cloneVariation(Variation $variation, ?Variation $parent = null): Variation
+    private function cloneVariation(Variation $variation, array $previousMoves = []): Variation
     {
-        if ($this->options->keepPreviousMoves && null !== $parent) {
-            $clonedVariation = clone $parent;
-            $clonedVariation->removeNodesFrom($variation->getFirstNode()->getKey());
-        } else {
-            $clonedVariation = new Variation();
-        }
+        $clonedVariation = new Variation(...$previousMoves);
 
         /** @var MoveNode $node */
         foreach ($variation as $node) {
@@ -84,5 +66,20 @@ class VariationSplitter implements VariationSplitterInterface
         }
 
         return $clonedVariation;
+    }
+
+    /**
+     * @param Variation[] $variations
+     *
+     * @return Variation[]
+     */
+    private function variationArrayUnique(array $variations): array
+    {
+        $result = [];
+        foreach ($variations as $variation) {
+            $result[$variation->getLitePGN()] = $variation;
+        }
+
+        return array_values($result);
     }
 }

@@ -10,5 +10,5 @@ interface VariationSplitterInterface
     /**
      * @return Variation[]
      */
-    public function split(Game|Variation $variation, ?SplitOptions $options = null): array;
+    public function split(Game|Variation $variation): array;
 }

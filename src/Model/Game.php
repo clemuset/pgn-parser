@@ -5,7 +5,6 @@ namespace Cmuset\PgnParser\Model;
 use Cmuset\PgnParser\Enum\ResultEnum;
 use Cmuset\PgnParser\Exporter\GameExporter;
 use Cmuset\PgnParser\Parser\PGNParser;
-use Cmuset\PgnParser\Splitter\SplitOptions;
 use Cmuset\PgnParser\Splitter\VariationSplitter;
 
 class Game
@@ -43,9 +42,9 @@ class Game
     /**
      * @return Variation[]
      */
-    public function split(?SplitOptions $options = null): array
+    public function split(): array
     {
-        return VariationSplitter::create($options)->split($this);
+        return VariationSplitter::create()->split($this);
     }
 
     public function getInitialPosition(): Position

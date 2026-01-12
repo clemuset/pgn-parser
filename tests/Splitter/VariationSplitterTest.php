@@ -7,7 +7,6 @@ use Cmuset\PgnParser\Model\Game;
 use Cmuset\PgnParser\Model\Move;
 use Cmuset\PgnParser\Model\MoveNode;
 use Cmuset\PgnParser\Model\Variation;
-use Cmuset\PgnParser\Splitter\SplitOptions;
 use Cmuset\PgnParser\Splitter\VariationSplitter;
 use PHPUnit\Framework\TestCase;
 
@@ -64,8 +63,7 @@ class VariationSplitterTest extends TestCase
         self::assertCount(3, $variations[0]);
 
         // Second game should have the variation
-        self::assertEquals('1... c5', $variations[1]->getLitePGN());
-        self::assertCount(1, $variations[1]);
+        self::assertEquals('1. e4 c5', $variations[1]->getLitePGN());
         self::assertSame('c5', $variations[1]->getLastNode()?->getMove()?->getSAN());
     }
 
@@ -111,42 +109,18 @@ class VariationSplitterTest extends TestCase
         self::assertSame('d5', $variations[2]->getLastNode()?->getMove()?->getSAN());
     }
 
-    public function testSplitKeepPreviousMovesOption(): void
+    public function testSplitComplexVariation(): void
     {
-        $variation = Variation::fromPGN('1. d4 d5 2. Bf4 (2. c4 c6 (2... d6) 3. Nc3) 2... c5');
+        $variation = Variation::fromPGN('1. d4 d5 2. Bf4 (2. c4 c6 (2... d6 3. Nf3 Nf6 (3... Nc6) 4. Nc3) 3. Nc3) 2... c5 (2... c6)');
 
-        // --------- With keepPreviousMoves = true ---------
-        $variations = $this->splitter->split($variation, new SplitOptions(keepPreviousMoves: true));
+        $variations = $variation->split();
 
-        self::assertCount(3, $variations);
-        self::assertEquals('1. d4 d5 2. c4 d6', $variations[2]->getLitePGN());
-
-        // --------- With keepPreviousMoves = false ---------
-        $variations = $this->splitter->split($variation, new SplitOptions(keepPreviousMoves: false));
-
-        self::assertCount(3, $variations);
-        self::assertEquals('2... d6', $variations[2]->getLitePGN());
-    }
-
-    public function testSplitColorOption(): void
-    {
-        $variation = Variation::fromPGN('1. d4 d5 2. Bf4 (2. c4 c6 (2... d6) 3. Nc3) 2... c5 (2... c6)');
-
-        // --------- Split only WHITE moves ---------
-        $splitter = VariationSplitter::create(new SplitOptions(keepPreviousMoves: true, colorToSplit: ColorEnum::WHITE));
-        $variations = $splitter->split($variation);
-
-        self::assertCount(2, $variations);
-        self::assertEquals('1. d4 d5 2. Bf4 c5 (2... c6)', $variations[0]->getLitePGN());
-        self::assertEquals('1. d4 d5 2. c4 c6 (2... d6) 3. Nc3', $variations[1]->getLitePGN());
-
-        // --------- Split only BLACK moves ---------
-        $splitter = VariationSplitter::create(new SplitOptions(keepPreviousMoves: true, colorToSplit: ColorEnum::BLACK));
-        $variations = $splitter->split($variation);
-
-        self::assertCount(2, $variations);
-        self::assertEquals('1. d4 d5 2. Bf4 (2. c4 c6 (2... d6) 3. Nc3) 2... c5', $variations[0]->getLitePGN());
-        self::assertEquals('1. d4 d5 2. Bf4 (2. c4 c6 (2... d6) 3. Nc3) 2... c6', $variations[1]->getLitePGN());
+        self::assertCount(5, $variations);
+        self::assertEquals('1. d4 d5 2. Bf4 c5', $variations[0]->getLitePGN());
+        self::assertEquals('1. d4 d5 2. c4 c6 3. Nc3', $variations[1]->getLitePGN());
+        self::assertEquals('1. d4 d5 2. c4 d6 3. Nf3 Nf6 4. Nc3', $variations[2]->getLitePGN());
+        self::assertEquals('1. d4 d5 2. c4 d6 3. Nf3 Nc6', $variations[3]->getLitePGN());
+        self::assertEquals('1. d4 d5 2. Bf4 c6', $variations[4]->getLitePGN());
     }
 
     public function testSplitVariationWithoutSubVariations(): void
