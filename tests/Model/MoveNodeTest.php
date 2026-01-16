@@ -13,8 +13,8 @@ class MoveNodeTest extends TestCase
 {
     public function testAddVariation(): void
     {
-        $node = new MoveNode();
-        $variation = new MoveNode();
+        $node = new MoveNode('d4');
+        $variation = new MoveNode('e4');
         $node->addVariation(new Variation($variation));
 
         self::assertCount(1, $node->getVariations());

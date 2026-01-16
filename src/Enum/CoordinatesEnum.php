@@ -138,4 +138,10 @@ enum CoordinatesEnum: string
 
         return self::tryFrom($newFile . $this->rank());
     }
+
+    public function isPromotionSquare(ColorEnum $color): bool
+    {
+        return (ColorEnum::WHITE === $color && 8 === $this->rank())
+            || (ColorEnum::BLACK === $color && 1 === $this->rank());
+    }
 }

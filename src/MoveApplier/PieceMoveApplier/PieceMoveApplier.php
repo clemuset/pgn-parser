@@ -24,24 +24,12 @@ abstract class PieceMoveApplier
         };
     }
 
+    /**
+     * @throws MoveApplyingException
+     */
     public function apply(Position $position, Move $move): void
     {
-        $potentialSquares = [];
-        foreach ($this->findSquaresWherePieceIs($position, $move) as $square) {
-            if ($this->canMove($square, $move->getTo(), $position)) {
-                $potentialSquares[] = $square;
-            }
-        }
-
-        if (count($potentialSquares) > 1) {
-            throw new MoveApplyingException(MoveViolationEnum::MULTIPLE_PIECES_MATCH);
-        }
-
-        if (0 === count($potentialSquares)) {
-            throw new MoveApplyingException(MoveViolationEnum::PIECE_NOT_FOUND);
-        }
-
-        $fromSquare = $potentialSquares[0];
+        $fromSquare = $this->findWherePieceIs($position, $move);
 
         $position->setPieceAt($fromSquare, null);
         $position->setPieceAt($move->getTo(), $move->getPiece());
@@ -62,31 +50,45 @@ abstract class PieceMoveApplier
 
     abstract public function isAttacking(CoordinatesEnum $from, CoordinatesEnum $to, Position $position): bool;
 
-    private function findSquaresWherePieceIs(Position $position, Move $move): array
+    /**
+     * @throws MoveApplyingException
+     */
+    final public function findWherePieceIs(Position $position, Move $move): CoordinatesEnum
     {
         $pieceToMove = $move->getPiece();
+        $squareFrom = $move->getSquareFrom();
 
-        if (null !== $move->getSquareFrom()) {
-            return $pieceToMove === $position->getPieceAt($move->getSquareFrom()) ? [$move->getSquareFrom()] : [];
-        }
-
-        if (null !== $move->getFileFrom()) {
-            return array_map(
+        $potentialCoordinates = match (true) {
+            null !== $move->getSquareFrom() => $pieceToMove === $position->getPieceAt($squareFrom) ? [$squareFrom] : [],
+            null !== $move->getFileFrom() => array_map(
                 fn (Square $square) => $square->getCoordinates(),
                 $position->findByFile($pieceToMove, $move->getFileFrom())
-            );
-        }
-
-        if (null !== $move->getRankFrom()) {
-            return array_map(
+            ),
+            null !== $move->getRankFrom() => array_map(
                 fn (Square $square) => $square->getCoordinates(),
                 $position->findByRank($pieceToMove, $move->getRankFrom())
-            );
+            ),
+            default => array_map(
+                fn (Square $square) => $square->getCoordinates(),
+                $position->find($pieceToMove)
+            ),
+        };
+
+        $coordinates = [];
+        foreach ($potentialCoordinates as $c) {
+            if ($this->canMove($c, $move->getTo(), $position)) {
+                $coordinates[] = $c;
+            }
         }
 
-        return array_map(
-            fn (Square $square) => $square->getCoordinates(),
-            $position->find($pieceToMove)
-        );
+        if (count($coordinates) > 1) {
+            throw new MoveApplyingException(MoveViolationEnum::MULTIPLE_PIECES_MATCH);
+        }
+
+        if (0 === count($coordinates)) {
+            throw new MoveApplyingException(MoveViolationEnum::PIECE_NOT_FOUND);
+        }
+
+        return $coordinates[0];
     }
 }

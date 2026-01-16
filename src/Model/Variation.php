@@ -91,8 +91,9 @@ class Variation implements \IteratorAggregate, \ArrayAccess, \Countable
         }
 
         $key = $node->getMoveNumber() . (ColorEnum::BLACK === $node->getColor() ? '...' : '.');
-        $this->identifier = $this->identifier ?: $node->getMove()?->getSAN() ?? null;
+        $this->identifier = $this->identifier ?: $node->getMove()?->getSAN() ?? throw new \RuntimeException('Cannot set variation identifier, move SAN is missing.');
         $this->nodes[$key] = $node;
+        $this->reorderNodes();
     }
 
     public function addNodes(string|MoveNode ...$moveNodes): void
@@ -100,6 +101,16 @@ class Variation implements \IteratorAggregate, \ArrayAccess, \Countable
         foreach ($moveNodes as $moveNode) {
             $this->addNode($moveNode);
         }
+    }
+
+    public function getNode(string $key): ?MoveNode
+    {
+        return $this->nodes[$key] ?? null;
+    }
+
+    private function reorderNodes(): void
+    {
+        ksort($this->nodes, SORT_NATURAL);
     }
 
     /**
@@ -122,6 +133,8 @@ class Variation implements \IteratorAggregate, \ArrayAccess, \Countable
         foreach ($keysToRemove as $keyToRemove) {
             unset($this->nodes[$keyToRemove]);
         }
+
+        $this->reorderNodes();
     }
 
     public function clearVariations(?ColorEnum $colorToClear = null): void
@@ -180,6 +193,24 @@ class Variation implements \IteratorAggregate, \ArrayAccess, \Countable
     public function isEmpty(): bool
     {
         return empty($this->nodes);
+    }
+
+    public function cloneFrom(string $key): self
+    {
+        $clonedVariation = new self();
+        $found = false;
+
+        foreach ($this->nodes as $nodeKey => $node) {
+            if ($nodeKey === $key) {
+                $found = true;
+            }
+
+            if ($found) {
+                $clonedVariation->addNode(clone $node);
+            }
+        }
+
+        return $clonedVariation;
     }
 
     public function __clone(): void

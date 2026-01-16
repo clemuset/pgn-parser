@@ -19,6 +19,9 @@ class MoveApplier implements MoveApplierInterface
         return new self();
     }
 
+    /**
+     * @throws MoveApplyingException
+     */
     public function apply(Position $position, Move $move): void
     {
         $pieceToMove = $move->getPiece();
@@ -97,6 +100,9 @@ class MoveApplier implements MoveApplierInterface
             || ($move->getPiece()->isPawn() && $move->getTo() === $position->getEnPassantTarget());
     }
 
+    /**
+     * @throws MoveApplyingException
+     */
     private function throwMoveViolationException(Position $position, Move $move): void
     {
         $pieceToMove = $move->getPiece();
